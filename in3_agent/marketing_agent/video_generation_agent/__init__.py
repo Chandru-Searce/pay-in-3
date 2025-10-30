@@ -1,0 +1,1 @@
+from .agent import root_agent as video_generation_agent

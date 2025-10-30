@@ -1,0 +1,28 @@
+# .venv folder
+.venv/
+.vscode/
+
+# pycache folder
+**/__pycache__/
+
+# Backup and env files
+backup_in3/
+in3_agent/.env
+
+# test folder
+test/
+
+# Folders to exclude
+in3_agent/agent_engine_deployment/
+in3_agent/register_to_agentspace/
+notebooks/
+
+# Dockerfile
+Dockerfile
+
+# Project management files
+pyproject.toml
+uv.lock
+
+# .sh file
+deploy_to_artifact_registry.sh

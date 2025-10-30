@@ -1,0 +1,205 @@
+{
+  "scenes": [
+    {
+      "scene_number": 1,
+      "scene_title": "The Hesitation",
+      "scene_duration": "0s–8s",
+      "shots": [
+        {
+          "shot_number": 1,
+          "timestamp": "0s–2s",
+          "subject": "A character in a sparsely furnished living room, holding a tablet.",
+          "action": "Character looks around the room with a thoughtful, slightly wistful expression. The room has large empty spaces. A subtle animated thought bubble with a question mark appears and pops.",
+          "style": "Flat 2.5D vector illustration, Alegria / Corporate Memphis style.",
+          "camera_positioning_and_motion": "Static medium shot, establishing the scene.",
+          "composition": "Character positioned in the left third, looking towards the empty space on the right. Strong use of negative space to convey emptiness.",
+          "focus_and_lens_effects": "Deep focus. The entire scene is sharp and clear.",
+          "ambiance": "Quiet, contemplative mood with soft, even lighting.",
+          "enhance_facial_details": "A pensive look, with slightly furrowed brows and a neutral mouth.",
+          "dialogue": "VO: 'Dreaming of the perfect space, but feeling held back?'",
+          "sound_effects": "Soft ambient room tone. A gentle 'pop' for the thought bubble.",
+          "ambient_noise": "A low, gentle synth pad."
+        },
+        {
+          "shot_number": 2,
+          "timestamp": "2s–4s",
+          "subject": "Close-up on the tablet screen.",
+          "action": "The character's finger smoothly scrolls through a mock furniture website. Stylized vector sofas and chairs glide by with an ease-out motion.",
+          "style": "Flat 2.5D vector illustration, Alegria / Corporate Memphis style.",
+          "camera_positioning_and_motion": "Tight shot on the tablet, which fills the frame. A subtle parallax effect on the background hints at the character holding it.",
+          "composition": "The scrolling UI elements are centered and are the clear focal point.",
+          "focus_and_lens_effects": "Deep focus, everything on the screen is sharp.",
+          "ambiance": "Bright, aspirational mood as the character browses beautiful items.",
+          "enhance_facial_details": "N/A",
+          "dialogue": "VO: 'You find the one...'",
+          "sound_effects": "A smooth, soft 'swoosh' sound for each scroll.",
+          "ambient_noise": "Synth pad becomes slightly more melodic and upbeat."
+        },
+        {
+          "shot_number": 3,
+          "timestamp": "4s–6s",
+          "subject": "Character and tablet. She has stopped scrolling on a perfect sofa.",
+          "action": "The character's eyes widen and a happy smile forms as she looks at the chosen sofa on the tablet. She leans in slightly.",
+          "style": "Flat 2.5D vector illustration, Alegria / Corporate Memphis style.",
+          "camera_positioning_and_motion": "Medium close-up, focusing on the character's facial expression and her hands on the tablet.",
+          "composition": "Over-the-shoulder shot, showing her face and the top of the tablet screen where the sofa is displayed.",
+          "focus_and_lens_effects": "Shallow depth of field cue, with the background softly blurred to emphasize her moment of discovery.",
+          "ambiance": "A moment of excitement and joy. Lighting becomes slightly warmer and brighter.",
+          "enhance_facial_details": "Eyes wide with delight, a broad, genuine smile.",
+          "dialogue": "VO: '...that perfect piece to complete your home.'",
+          "sound_effects": "A gentle, positive 'chime' as she stops on the item.",
+          "ambient_noise": "A hopeful, rising synth chord."
+        },
+        {
+          "shot_number": 4,
+          "timestamp": "6s–8s",
+          "subject": "A large, abstract price tag icon appears on the tablet screen.",
+          "action": "The price tag icon scales up quickly next to the sofa image. The character's smile immediately fades into a look of concern and hesitation. She pulls back slightly.",
+          "style": "Flat 2.5D vector illustration, Alegria / Corporate Memphis style.",
+          "camera_positioning_and_motion": "Quick zoom-in on the tablet screen, then back to the character's face.",
+          "composition": "The price tag icon dominates the right side of the screen. The character's worried face is framed on the left.",
+          "focus_and_lens_effects": "Sharp focus on the price tag and her changing expression.",
+          "ambiance": "The mood shifts to disappointment. The bright, warm light dims slightly.",
+          "enhance_facial_details": "Smile drops, eyebrows furrow, mouth becomes a thin, worried line.",
+          "dialogue": "VO: 'But the upfront cost gives you pause.'",
+          "sound_effects": "A dull 'thud' or a minor-key sound effect as the price appears.",
+          "ambient_noise": "The synth music halts abruptly, replaced by a low, dissonant hum."
+        }
+      ]
+    },
+    {
+      "scene_number": 2,
+      "scene_title": "The Solution with in3",
+      "scene_duration": "0s–8s",
+      "shots": [
+        {
+          "shot_number": 1,
+          "timestamp": "0s–2s",
+          "subject": "Tablet screen showing the sofa and the large price tag.",
+          "action": "The 'in3' logo elegantly animates into view beside the price tag. A mock UI button with the in3 logo appears below, pulsing gently.",
+          "style": "Flat 2.5D vector illustration, Alegria / Corporate Memphis style.",
+          "camera_positioning_and_motion": "Static close-up on the tablet screen.",
+          "composition": "The screen content is centered. The in3 logo and button are positioned to create a balanced, clear layout.",
+          "focus_and_lens_effects": "A soft, encouraging glow emanates from the in3 logo.",
+          "ambiance": "Hopeful and intriguing. The lighting on screen begins to brighten again.",
+          "enhance_facial_details": "N/A",
+          "dialogue": "VO: 'What if you could pay later? In three parts.'",
+          "sound_effects": "A soft, welcoming 'swoosh' and 'chime' as the in3 logo appears.",
+          "ambient_noise": "A new, simple and positive synth melody begins."
+        },
+        {
+          "shot_number": 2,
+          "timestamp": "2s–4s",
+          "subject": "The price tag icon on the tablet.",
+          "action": "The single large price bar animates, cleanly splitting into three smaller, equal-sized bars. Each bar settles into place with a satisfying, soft bounce.",
+          "style": "Flat 2.5D vector illustration, Alegria / Corporate Memphis style.",
+          "camera_positioning_and_motion": "Extreme close-up, focusing solely on the price tag animation.",
+          "composition": "The bars are perfectly centered, animating symmetrically to demonstrate fairness and simplicity.",
+          "focus_and_lens_effects": "Each of the three new bars gets a brief, soft highlight as it settles.",
+          "ambiance": "Clarity and relief. The visual is clean and easy to understand.",
+          "enhance_facial_details": "N/A",
+          "dialogue": "VO: 'With zero interest. Ever.'",
+          "sound_effects": "A clean 'split' sound, followed by three distinct, pleasant 'tick' sounds.",
+          "ambient_noise": "The positive melody continues, building slightly."
+        },
+        {
+          "shot_number": 3,
+          "timestamp": "4s–6s",
+          "subject": "The character's face reacting to the change on screen.",
+          "action": "Her expression shifts from worry to curiosity, then to a dawning realization and relief. A small, confident smile returns.",
+          "style": "Flat 2.5D vector illustration, Alegria / Corporate Memphis style.",
+          "camera_positioning_and_motion": "Medium close-up on the character's face.",
+          "composition": "Her face fills the frame, allowing the audience to clearly read her emotional journey.",
+          "focus_and_lens_effects": "Soft focus on the background, sharp focus on her eyes and smile.",
+          "ambiance": "Empowering and optimistic. The lighting becomes bright and positive.",
+          "enhance_facial_details": "Eyebrows raise, eyes widen slightly, a relieved smile forms.",
+          "dialogue": "VO: 'That changes everything.'",
+          "sound_effects": "A soft, inspiring 'chime' that underscores her realization.",
+          "ambient_noise": "The synth melody becomes fuller and more confident."
+        },
+        {
+          "shot_number": 4,
+          "timestamp": "6s–8s",
+          "subject": "Character's hand and the tablet.",
+          "action": "Her finger moves decisively and taps the mock 'Pay with in3' button. The button depresses with a subtle bounce-back animation, and a ring of light expands from it.",
+          "style": "Flat 2.5D vector illustration, Alegria / Corporate Memphis style.",
+          "camera_positioning_and_motion": "Over-the-shoulder close-up, focusing on the tap action.",
+          "composition": "The finger, hand, and button are the focal point. The action is clear and centered.",
+          "focus_and_lens_effects": "A bright but soft flash effect on the button tap.",
+          "ambiance": "Decisive, confident, and satisfying.",
+          "enhance_facial_details": "N/A",
+          "dialogue": "(no VO)",
+          "sound_effects": "A crisp, satisfying 'tap' sound followed by a quick, ascending 'whoosh'.",
+          "ambient_noise": "The music swells to a positive crescendo."
+        }
+      ]
+    },
+    {
+      "scene_number": 3,
+      "scene_title": "The Happy Home",
+      "scene_duration": "0s–8s",
+      "shots": [
+        {
+          "shot_number": 1,
+          "timestamp": "0s–2s",
+          "subject": "The character relaxing on her new sofa in a now fully furnished room.",
+          "action": "A quick wipe transition reveals the new scene. The character is smiling, leaning back comfortably on her new sofa, holding a mug.",
+          "style": "Flat 2.5D vector illustration, Alegria / Corporate Memphis style.",
+          "camera_positioning_and_motion": "Static medium shot.",
+          "composition": "The character and her new sofa are the central focus. The background is now filled with stylish decor like a plant and wall art.",
+          "focus_and_lens_effects": "The scene has a warm, soft glow.",
+          "ambiance": "Content, cozy, and peaceful. The lighting is warm and inviting, like afternoon sun.",
+          "enhance_facial_details": "A relaxed, happy smile. Eyes are soft and content.",
+          "dialogue": "VO: 'Get what you love now.'",
+          "sound_effects": "A final 'swoosh' for the transition, then gentle room tone.",
+          "ambient_noise": "A calm, pleasant, and resolved synth track."
+        },
+        {
+          "shot_number": 2,
+          "timestamp": "2s–4s",
+          "subject": "Character taking a sip from her mug.",
+          "action": "She takes a slow, satisfying sip, looking around her new living room with pride. She gives a small, happy nod.",
+          "style": "Flat 2.5D vector illustration, Alegria / Corporate Memphis style.",
+          "camera_positioning_and_motion": "Slight dolly-in (slow zoom) towards the character to increase intimacy.",
+          "composition": "Close-up on her upper body and face, capturing her contentment.",
+          "focus_and_lens_effects": "Shallow depth of field, with the background decor softly out of focus.",
+          "ambiance": "A strong sense of 'home' and personal satisfaction.",
+          "enhance_facial_details": "Eyes crinkle at the edges as she smiles. A look of pure satisfaction.",
+          "dialogue": "VO: 'Pay without the pressure.'",
+          "sound_effects": "A soft clink of the mug, a gentle sigh of contentment.",
+          "ambient_noise": "The calm synth track continues."
+        },
+        {
+          "shot_number": 3,
+          "timestamp": "4s–6s",
+          "subject": "Wide shot of the beautiful, complete living room.",
+          "action": "The camera pulls back to reveal the full room. Abstract icons representing 'comfort,' 'style,' and 'happiness' gently float and fade in the air.",
+          "style": "Flat 2.5D vector illustration, Alegria / Corporate Memphis style.",
+          "camera_positioning_and_motion": "Slow dolly-out (zoom out) to a final wide shot.",
+          "composition": "A well-balanced composition showing the entire furnished space. The character on the sofa is a key element, but the focus is the overall transformation.",
+          "focus_and_lens_effects": "Deep focus, showing the entire beautiful room clearly.",
+          "ambiance": "Aspirational and fulfilling. The room is a perfect picture of modern comfort.",
+          "enhance_facial_details": "Character maintains a small, distant smile.",
+          "dialogue": "VO: 'Your dream home is within reach.'",
+          "sound_effects": "Three soft, magical 'shimmers' as the icons appear.",
+          "ambient_noise": "Music swells slightly, feeling conclusive and warm."
+        },
+        {
+          "shot_number": 4,
+          "timestamp": "6s–8s",
+          "subject": "Final lockup with the in3 logo.",
+          "action": "The in3 logo and a mock tagline 'Pay in 3. No interest. No worries.' animates smoothly into the center of the frame. The background scene softens slightly.",
+          "style": "Flat 2.5D vector illustration, Alegria / Corporate Memphis style.",
+          "camera_positioning_and_motion": "Static wide shot.",
+          "composition": "The logo and text are layered centrally over the background scene, creating a clear and memorable final frame.",
+          "focus_and_lens_effects": "The logo has a subtle, confident glow. The background scene has a soft focus applied.",
+          "ambiance": "Trustworthy, simple, and empowering.",
+          "enhance_facial_details": "N/A",
+          "dialogue": "VO: 'in3. Welcome home.'",
+          "sound_effects": "The final in3 brand sound logo/chime.",
+          "ambient_noise": "The music resolves and fades to silence."
+        }
+      ]
+    }
+  ]
+}
