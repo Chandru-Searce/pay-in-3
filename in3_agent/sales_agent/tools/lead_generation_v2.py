@@ -1,13 +1,15 @@
 import os
 import json
 import requests
-from dotenv import load_dotenv
+import pandas as pd
 from loguru import logger
+from dotenv import load_dotenv
+from google.cloud import bigquery
+from .pipedrive_apis.create_lead import create_lead
+from .pipedrive_apis.add_person import create_person_v2
+from .pipedrive_apis.get_persons_v2 import get_persons_v2
 from .pipedrive_apis.get_organizations_v2 import get_organizations_v2
 from .pipedrive_apis.add_organizations import create_organization_v2
-from .pipedrive_apis.add_person import create_person_v2
-from .pipedrive_apis.create_lead import create_lead
-from .pipedrive_apis.get_persons_v2 import get_persons_v2
 
 
 # ---------------------------
@@ -25,6 +27,32 @@ load_dotenv()
 PIPEDRIVE_API_KEY = os.getenv("PIPEDRIVE_API_KEY")
 OWNER_ID = int(os.getenv("OWNER_ID_CHANDRU"))
 
+def _get_unique_names(
+    column_name: str = "name"
+) -> pd.Series:
+    """
+    Returns unique values from the specified column in a BigQuery table.
+    
+    Args:
+        column_name (str): Column to get unique values from (default: 'name')
+    
+    Returns:
+        pd.Series: Unique values sorted alphabetically
+    """
+    client = bigquery.Client(project=os.getenv("GOOGLE_CLOUD_PROJECT"))
+    table_ref = f"{os.getenv("GOOGLE_CLOUD_PROJECT")}.{os.getenv("BIGQUERY_DATASET")}.{os.getenv("TABLE_NAME")}"
+    
+    query = f"""
+    SELECT DISTINCT `{column_name}`
+    FROM `{table_ref}`
+    WHERE `{column_name}` IS NOT NULL
+    ORDER BY `{column_name}`
+    """
+    df = client.query(query).to_dataframe()
+    
+    unique_values = df.iloc[:, 0]  # First (and only) column
+    
+    return list(unique_values.values)
 
 def get_existing_leads():
     """Fetch existing leads from Pipedrive API"""
@@ -66,6 +94,7 @@ def process_leads(lead_data: dict, max_leads: int = 100):
     existing_person_map = {p["person_name"]: p["id"] for p in existed_persons}
 
     existing_leads = get_existing_leads()
+    existing_person_map_in_bigquery = _get_unique_names()
 
     for idx, lead in enumerate(lead_data.get("contacts", [])):
         if max_leads and idx >= max_leads:
@@ -80,7 +109,7 @@ def process_leads(lead_data: dict, max_leads: int = 100):
         lead_title = lead.get("lead_title") or "unknown_lead"
 
         # Step 1: Ensure organization exists
-        if org_name not in existing_org_map:
+        if (org_name not in existing_org_map) and (org_name not in existing_person_map_in_bigquery):
             logger.info(f"Creating new organization: {org_name}")
             org_created = create_organization_v2(
                 name=org_name,
@@ -145,5 +174,3 @@ if __name__ == "__main__":
 
     process_leads(lead_data, max_leads=5)
 
-# data = get_existing_leads()
-# print(data)

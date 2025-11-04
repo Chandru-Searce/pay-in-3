@@ -8,6 +8,7 @@
 # Backup and env files
 backup_in3/
 in3_agent/.env
+in3_agent/sales_agent_copy
 
 # test folder
 test/
