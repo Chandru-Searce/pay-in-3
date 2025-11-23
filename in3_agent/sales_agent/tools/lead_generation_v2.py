@@ -11,16 +11,6 @@ from .pipedrive_apis.get_persons_v2 import get_persons_v2
 from .pipedrive_apis.get_organizations_v2 import get_organizations_v2
 from .pipedrive_apis.add_organizations import create_organization_v2
 
-
-# ---------------------------
-# Setup loguru logger
-# ---------------------------
-LOG_FOLDER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "logs")
-os.makedirs(LOG_FOLDER_PATH, exist_ok=True)
-
-LOG_FILE_PATH = os.path.join(LOG_FOLDER_PATH, "pipedrive_lead_import.log")
-logger.add(LOG_FILE_PATH, rotation="1 MB", retention="7 days", level="INFO")
-
 # Load env variables
 load_dotenv()
 
@@ -77,15 +67,37 @@ def is_duplicate_lead(title, org_id, person_id, existing_leads):
             return True
     return False
 
+def is_json_file_empty(path):
+    if os.path.getsize(path) == 0:
+        return True  # File has no bytes at all
 
-def process_leads(lead_data: dict, max_leads: int = 100):
+    with open(path, "r") as f:
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError:
+            return True  # Invalid or empty JSON
+
+    return data == {} or data == []  # JSON is structurally empty
+
+def _lead_generation(max_leads: int = 100):
     """
     Use this tool to push lead data into the Pipedrive CRM system.
 
     Args:
-        lead_data (dict): Lead data (should contain "contacts" key)
         max_leads (int, optional): Limit number of leads to process
     """
+    LEAD_DATA_FILE_PATH = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..",
+        "lead_data",
+        "final-leads-with-enrichment.json"
+    )
+
+    with open(LEAD_DATA_FILE_PATH, "r") as file:
+        lead_data = json.load(file)
+
+    is_empty = is_json_file_empty(LEAD_DATA_FILE_PATH)
+
     # Fetch existing organizations and persons
     existed_organizations = get_organizations_v2(owner_id=int(OWNER_ID))
     existing_org_map = {org["org_name"]: org["org_id"] for org in existed_organizations}
@@ -96,81 +108,76 @@ def process_leads(lead_data: dict, max_leads: int = 100):
     existing_leads = get_existing_leads()
     existing_person_map_in_bigquery = _get_unique_names()
 
-    for idx, lead in enumerate(lead_data.get("contacts", [])):
-        if max_leads and idx >= max_leads:
-            logger.info(f"Reached processing limit of {max_leads} leads, stopping.")
-            break
+    if is_empty == False:
 
-        # Extract and validate fields
-        org_name = lead.get("organization_name") or "unknown_organization"
-        person_name = lead.get("person_name") or "unknown_person"
-        person_email = lead.get("person_email") or None
-        person_phone = lead.get("person_phone") or None
-        lead_title = lead.get("lead_title") or "unknown_lead"
+        for idx, lead in enumerate(lead_data.get("contacts", [])):
+            if max_leads and idx >= max_leads:
+                logger.info(f"Reached processing limit of {max_leads} leads, stopping.")
+                break
 
-        # Step 1: Ensure organization exists
-        if (org_name not in existing_org_map) and (org_name not in existing_person_map_in_bigquery):
-            logger.info(f"Creating new organization: {org_name}")
-            org_created = create_organization_v2(
-                name=org_name,
+            # Extract and validate fields
+            org_name = lead.get("organization_name") or "unknown_organization"
+            person_name = lead.get("person_name") or "unknown_person"
+            person_email = lead.get("person_email") or None
+            person_phone = lead.get("person_phone_number") or None
+            lead_title = lead.get("lead_title") or "unknown_lead"
+
+            # Step 1: Ensure organization exists
+            if (org_name not in existing_org_map) and (org_name not in existing_person_map_in_bigquery):
+                logger.info(f"Creating new organization: {org_name}")
+                org_created = create_organization_v2(
+                    name=org_name,
+                    owner_id=int(OWNER_ID),
+                    visible_to=3
+                )
+                org_id = org_created["data"]["id"]
+                existing_org_map[org_name] = org_id
+                logger.success(f"Organization created: {org_name} (ID: {org_id})")
+            else:
+                org_id = existing_org_map[org_name]
+                logger.info(f"Organization already exists: {org_name} (ID: {org_id})")
+
+            # Step 2: Ensure person exists
+            if person_name not in existing_person_map:
+                logger.info(f"Creating new person: {person_name}")
+                person_created = create_person_v2(
+                    name=person_name,
+                    owner_id=int(OWNER_ID),
+                    org_id=org_id,
+                    email_value=person_email,
+                    email_primary=True,
+                    phone_value=person_phone,
+                    phone_primary=True,
+                    visible_to=3
+                )
+                person_id = person_created["data"]["id"]
+                existing_person_map[person_name] = person_id
+                logger.success(f"Person created: {person_name} (ID: {person_id})")
+            else:
+                person_id = existing_person_map[person_name]
+                logger.info(f"Person already exists: {person_name} (ID: {person_id})")
+
+            # Step 3: Ensure lead doesn’t exist
+            if is_duplicate_lead(lead_title, org_id, person_id, existing_leads):
+                logger.warning(f"Duplicate lead found. Skipping: {lead_title}")
+                continue
+
+            # Step 4: Create lead
+            logger.info(f"Creating lead: {lead_title}")
+            lead_created = create_lead(
+                title=lead_title,
                 owner_id=int(OWNER_ID),
-                visible_to=3
+                person_id=person_id,
+                organization_id=org_id,
+                visible_to="3"
             )
-            org_id = org_created["data"]["id"]
-            existing_org_map[org_name] = org_id
-            logger.success(f"Organization created: {org_name} (ID: {org_id})")
-        else:
-            org_id = existing_org_map[org_name]
-            logger.info(f"Organization already exists: {org_name} (ID: {org_id})")
-
-        # Step 2: Ensure person exists
-        if person_name not in existing_person_map:
-            logger.info(f"Creating new person: {person_name}")
-            person_created = create_person_v2(
-                name=person_name,
-                owner_id=int(OWNER_ID),
-                org_id=org_id,
-                email_value=person_email,
-                email_primary=True,
-                phone_value=person_phone,
-                phone_primary=True,
-                visible_to=3
-            )
-            person_id = person_created["data"]["id"]
-            existing_person_map[person_name] = person_id
-            logger.success(f"Person created: {person_name} (ID: {person_id})")
-        else:
-            person_id = existing_person_map[person_name]
-            logger.info(f"Person already exists: {person_name} (ID: {person_id})")
-
-        # Step 3: Ensure lead doesn’t exist
-        if is_duplicate_lead(lead_title, org_id, person_id, existing_leads):
-            logger.warning(f"Duplicate lead found. Skipping: {lead_title}")
-            continue
-
-        # Step 4: Create lead
-        logger.info(f"Creating lead: {lead_title}")
-        lead_created = create_lead(
-            title=lead_title,
-            owner_id=int(OWNER_ID),
-            person_id=person_id,
-            organization_id=org_id,
-            visible_to="3"
-        )
-        logger.success(f"Lead created: {lead_created['data']['id']}")
-
-
-if __name__ == "__main__":
-    # Example: Load the lead_data.json and process 5 leads
-    LEAD_DATA_FILE_PATH = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        "..",
-        "lead_data",
-        "contacts.json"
-    )
-
-    with open(LEAD_DATA_FILE_PATH, "r") as file:
-        lead_data = json.load(file)
-
-    process_leads(lead_data, max_leads=5)
+            logger.success(f"Lead created: {lead_created['data']['id']}")
+            
+            return {
+                "Status": "Lead data has been pushed to pipedrive sucessfully"
+            }
+    else:
+        return {
+            "Status": "There is no lead data to push into pipedrive"
+        }
 

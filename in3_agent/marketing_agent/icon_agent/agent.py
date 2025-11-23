@@ -22,5 +22,5 @@ root_agent = LlmAgent(
         top_p=1.0
     ),
     tools=[_icon_generator_function, _edit_icon_design],
-    after_tool_callback=_return_generated_icon
+    # after_tool_callback=_return_generated_icon
 )

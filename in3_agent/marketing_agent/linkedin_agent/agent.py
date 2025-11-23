@@ -4,7 +4,8 @@ from google.genai.types import GenerateContentConfig
 from .prompt import LINKEDIN_POST_AGENT_PROMPT
 from .tools.linkedin_post_generator import _linkedin_post_generator_function
 from .tools.linkedin_post_editor import _edit_linkedin_post
-from .callbacks.return_artifacts import _return_generated_illustrations
+from .callbacks.return_artifacts import _return_generated_linkedin_post
+
 
 root_agent = LlmAgent(
     name="linkedin_agent",
@@ -23,5 +24,5 @@ root_agent = LlmAgent(
         top_p=1.0
     ),
     tools=[_linkedin_post_generator_function, _edit_linkedin_post],
-    after_tool_callback=_return_generated_illustrations
+    # after_tool_callback=_return_generated_linkedin_post
 )

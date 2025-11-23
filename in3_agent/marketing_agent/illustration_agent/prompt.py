@@ -16,6 +16,7 @@ ILLUSTRATION_GENERATION_AGENT_PROMPT = """
       "actions": [
         "Create an enhanced prompt by filling in the provided template with the user’s concept and aspect ratio.",
         "Call the `_illustration_generator_function` tool with the enhanced prompt and selected aspect ratio."
+        "After the tool execution is complete, present the generated illustration’s public URL to the user clearly, so they can view or download it."
       ]
     }
   },
@@ -42,7 +43,7 @@ ILLUSTRATION_GENERATION_AGENT_PROMPT = """
       "Step 1: Ask: “What scene, subject, or concept would you like this artwork to represent?”",
       "Step 2: Ask: “Which aspect ratio would you like for your illustration? You can choose one of the following: 1:1, 4:3, 4:5, 16:9, 21:9. If not specified, the default is 1:1 (square).”",
       "Step 3: Wait for the user’s response (the illustration concept).",
-      "Step 4: Once the concept and aspect ratio are provided: Fill the template with the illustration concept and aspect ratio, generate the enhanced prompt, and call the `_illustration_generator_function` tool with the completed enhanced prompt and aspect ratio."
+      "Step 4: Once the concept and aspect ratio are provided: Fill the template with the illustration concept and aspect ratio, generate the enhanced prompt, and call the `_illustration_generator_function` tool with the completed enhanced prompt and aspect ratio. After the tool finishes, display the generated illustration’s public URL to the user."
     ]
   },
   "example_usage_generation": {
@@ -88,7 +89,7 @@ ILLUSTRATION_GENERATION_AGENT_PROMPT = """
     "steps": [
       "Step 1: Ask: “Please let me know if you require any changes to the generated illustration.”",
       "Step 2: Wait for the user’s request for editing the illustration (the illustration request).",
-      "Step 4: Once the request and aspect ratio are provided: Fill the template with the illustration request and aspect ratio, generate the enhanced prompt, and call the `_edit_illustration_design` tool with the illustration request prompt and aspect ratio."
+      "Step 3: Once the request and aspect ratio are provided: Fill the template with the illustration request and aspect ratio, generate the enhanced prompt, and call the `_edit_illustration_design` tool with the illustration request prompt and aspect ratio. After the tool finishes, present the edited illustration’s public URL to the user."
     ]
   },
   "example_usage_editing": {

@@ -15,6 +15,7 @@ ICON_GENERATION_AGENT_PROMPT = """
       "actions": [
         "Create an enhanced prompt by filling in the provided template with the user’s concept.",
         "Call the `_icon_generator_function` tool with the enhanced prompt."
+        "After the tool execution is complete, present the generated icon’s public URL to the user clearly, so they can view or download it."
       ]
     }
   },
@@ -37,8 +38,8 @@ ICON_GENERATION_AGENT_PROMPT = """
   "workflow_generation": {
     "steps": [
       "Step 1: Ask: “What object or concept would you like this icon to represent?”",
-      "Step 3: Wait for the user’s response (the icon concept).",
-      "Step 4: Once the concept is provided: Fill in the template with the icon concept, generate the enhanced prompt, and call the `_icon_generator_function` tool with the completed enhanced prompt."
+      "Step 2: Wait for the user’s response (the icon concept).",
+      "Step 3: Once the concept is provided: Fill in the template with the icon concept, generate the enhanced prompt, and call the `_icon_generator_function` tool with the completed enhanced prompt. After the tool finishes, display the generated icon’s public URL to the user."
     ]
   },
   "example_usage_generation": {
@@ -80,8 +81,8 @@ ICON_GENERATION_AGENT_PROMPT = """
   "workflow_editing": {
     "steps": [
       "Step 1: Ask: “Do you want to add modification to the icon image?”",
-      "Step 3: Wait for the user’s response (the icon modification request).",
-      "Step 4: Once the request is provided: Fill in the template with the icon request, generate the enhanced prompt, and call the `_edit_icon_design` tool with the completed enhanced prompt."
+      "Step 2: Wait for the user’s response (the icon modification request).",
+      "Step 2: Once the request is provided: Fill in the template with the icon request, generate the enhanced prompt, and call the `_edit_icon_design` tool with the completed enhanced prompt. After the tool finishes, present the edited icon’s public URL to the user."
     ]
   },
   "example_usage_editing": {

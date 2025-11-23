@@ -1,19 +1,22 @@
 # Import necassary packages
+import uuid
 import random
 from google import genai
-from google.cloud import storage
 from google.genai import types
+from google.cloud import storage
+from datetime import datetime, timezone
+from google.adk.tools import ToolContext
 from google.genai.types import ImageConfig
 from ..utils.text_remover import _remove_text_from_generated_image
 
 gemini_client = genai.Client(
         vertexai=True,
-        project="prj-in3-non-prod-svc-01",
+        project="prj-in3-prod-svc-01",
         location="europe-west4",
     )
 
 storage_client = storage.Client(
-        project="prj-in3-non-prod-svc-01"
+        project="prj-in3-prod-svc-01"
     )
 
 def _get_relevant_images():
@@ -25,9 +28,8 @@ def _get_relevant_images():
             A list of matching file names (including their full paths within the bucket).
             Returns an empty list if no files are found.
     """
-
-    bucket_name = "brand-guidelines-in3"
-    folder = "brand_guidelines/images/"
+    bucket_name = "in3-brand-guidelines"
+    folder = "Brand guidelines /images/"
     starts_with = ['ad']
 
     results = []
@@ -38,7 +40,7 @@ def _get_relevant_images():
         search_prefix = f"{folder.rstrip('/')}/{prefix}"
         blobs = storage_client.list_blobs(bucket_name, prefix=search_prefix)
         for blob in blobs:
-            results.append("gs://brand-guidelines-in3/"+blob.name)
+            results.append("gs://in3-brand-guidelines/"+blob.name)
 
     if results:
         selected = random.sample(results, min(len(results), 3))
@@ -51,7 +53,7 @@ def _get_relevant_images():
         print("No files found.")
         return []
 
-def _ad_campaign_generator_function(input_text: str, aspect_ratio: str): 
+def _ad_campaign_generator_function(input_text: str, aspect_ratio: str, tool_context: ToolContext): 
     """
     Use this tool to generate ad campaign post/image using the Gemini model.
 
@@ -71,21 +73,23 @@ def _ad_campaign_generator_function(input_text: str, aspect_ratio: str):
         types.Part: 
             A generated image as types.Part objects.
     """
-    # Prepare image parts dynamically based on input list
+    # --- Initialize storage ---
+    bucket_name = "marketing_agent_artifacts"
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+
+    # --- Prepare reference images ---
     reference_images_uri = _get_relevant_images()
-    
     image_parts = []
-    for uri in reference_images_uri:
+    for uri in reference_images_uri[:3]:  # Gemini supports up to 3 images
         image_parts.append(
             types.Part.from_uri(file_uri=uri, mime_type="image/png")
         )
-        if len(image_parts) == 3:  # We can only pass upto 3 images for gemini-2.5-image-preview
-            break
 
-    # Prepare user prompt
+    # --- Prepare user text prompt ---
     text_part = types.Part.from_text(text=input_text)
 
-    # Create content (combine images + text)
+    # --- Combine images and text into request content ---
     contents = [
         types.Content(
             role="user",
@@ -93,14 +97,12 @@ def _ad_campaign_generator_function(input_text: str, aspect_ratio: str):
         )
     ]
 
-    # Generate config
+    # --- Configure generation parameters ---
     generate_content_config = types.GenerateContentConfig(
         temperature=0.0,
         top_k=1,
         top_p=0.95,
-        image_config=ImageConfig(
-            aspect_ratio=aspect_ratio
-        ),
+        image_config=ImageConfig(aspect_ratio=aspect_ratio),
         max_output_tokens=32768,
         response_modalities=["IMAGE"],
         safety_settings=[
@@ -111,14 +113,14 @@ def _ad_campaign_generator_function(input_text: str, aspect_ratio: str):
         ],
     )
 
-    # Generate content
+    # --- Generate content via Gemini ---
     response = gemini_client.models.generate_content(
         model="gemini-2.5-flash-image",
         contents=contents,
         config=generate_content_config,
     )
 
-    # --- Collect first generated image ---
+    # --- Extract first generated image ---
     generated_image = None
     for cand in response.candidates:
         for part in cand.content.parts:
@@ -129,13 +131,41 @@ def _ad_campaign_generator_function(input_text: str, aspect_ratio: str):
             break
 
     if not generated_image:
-        return "No image was generated."
+        return {"Status": "No image was generated."}
 
-    # with open("ad_campaign_image.png", "wb") as f:
-    #     f.write(generated_image)
+    # --- Timestamp (timezone-aware, no deprecation warning) ---
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
 
-    generated_image_with_text = types.Part(inline_data=types.Blob(data=generated_image, mime_type="image/png"))
+    # --- Store "with text" image in GCS ---
+    destination_blob_with_text = f"ad_campaigns/{timestamp}_{uuid.uuid4().hex[:8]}_with_text.png"
+    blob_with_text = bucket.blob(destination_blob_with_text)
+    blob_with_text.upload_from_string(
+        data=generated_image,
+        content_type="image/png"
+    )
 
-    generated_image_without_text = _remove_text_from_generated_image(generated_image=generated_image_with_text)
-    
-    return [generated_image_with_text, generated_image_without_text]
+    # --- Construct final URIs ---
+    with_text_gcs_uri = f"gs://{bucket_name}/{destination_blob_with_text}"
+
+    # --- Generate "without text" image (custom method) ---
+    generated_image_without_text = _remove_text_from_generated_image(gcs_uri_with_text=with_text_gcs_uri)
+
+    # --- Store "without text" image in GCS ---
+    destination_blob_without_text = f"ad_campaigns/{timestamp}_{uuid.uuid4().hex[:8]}_without_text.png"
+    blob_without_text = bucket.blob(destination_blob_without_text)
+    blob_without_text.upload_from_string(
+        data=generated_image_without_text,
+        content_type="image/png"
+    )
+
+    # --- Update tool context state ---
+    tool_context.state["latest_ad_campaign_post_uri_with_text"] = with_text_gcs_uri
+
+    # --- Return structured response ---
+    return {
+        "Status": "Ad campaign image generation completed successfully",
+        "With_Text_Public_URL": f"https://storage.cloud.google.com/{bucket_name}/{destination_blob_with_text}",
+        "Without_Text_Public_URL": f"https://storage.cloud.google.com/{bucket_name}/{destination_blob_without_text}"
+    }
+
+

@@ -7,7 +7,7 @@ from google.adk.tools.tool_context import ToolContext
 def _return_generated_illustrations(
     tool: FunctionTool,
     args: Dict[str, Any],
-    tool_response: Dict,
+    tool_response: Part,
     tool_context: ToolContext,
 ) -> Part:
     """
@@ -24,4 +24,3 @@ def _return_generated_illustrations(
         tool_context.state['latest_illustration'] = tool_response
 
         return artifact
-

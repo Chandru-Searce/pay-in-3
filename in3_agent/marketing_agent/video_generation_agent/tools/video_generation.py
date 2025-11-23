@@ -3,27 +3,30 @@ import os
 import cv2
 import json
 import time
+import uuid
 import tempfile
 from google.genai import Client
 from google.cloud import storage
 from google.genai import types
+from datetime import datetime, timezone
 from .prompt import INITIAL_FRAME_GENERATION_PROMPT
 from moviepy import VideoFileClip, concatenate_videoclips
+from google.genai.types import VideoGenerationReferenceImage, VideoGenerationReferenceType
 
 gemini_client = Client(
     vertexai=True,
-    project="prj-in3-non-prod-svc-01",
+    project="prj-in3-prod-svc-01",
     location="europe-west4",
 )
 
 veo_client = Client(
     vertexai=True,
-    project="prj-in3-non-prod-svc-01",
+    project="prj-in3-prod-svc-01",
     location="us-central1",
 )
 
 storage_client = storage.Client(
-    project="prj-in3-non-prod-svc-01"
+    project="prj-in3-prod-svc-01"
 )
 
 def _generate_prompt_for_initial_frame():
@@ -64,17 +67,17 @@ def _generate_initial_frame():
     initial_frame_generation_prompt = _generate_prompt_for_initial_frame()
 
     frame_1 = types.Part.from_uri(
-        file_uri="gs://brand-guidelines-in3/brand_guidelines/reference_images_for_video_generation/frame_1.jpg",
+        file_uri="gs://in3-brand-guidelines/Brand guidelines /reference_images_for_video_generation/frame_1.jpg",
         mime_type="image/jpg"
     )
 
     frame_2 = types.Part.from_uri(
-        file_uri="gs://brand-guidelines-in3/brand_guidelines/reference_images_for_video_generation/frame_314.jpg",
+        file_uri="gs://in3-brand-guidelines/Brand guidelines /reference_images_for_video_generation/frame_314.jpg",
         mime_type="image/jpg"
     )
 
     visual_reference = types.Part.from_uri(
-        file_uri="gs://brand-guidelines-in3/brand_guidelines/images/visual_template.png",
+        file_uri="gs://in3-brand-guidelines/Brand guidelines /images/visual_template.png",
         mime_type="image/png"
     )
 
@@ -118,8 +121,8 @@ def _generate_initial_frame():
         data=image_bytes, mime_type="image/png"
     )
 
-    with open("initial_frame.png", "wb") as file:
-        file.write(image_bytes)
+    # with open("initial_frame.png", "wb") as file:
+    #     file.write(image_bytes)
 
     return first_frame
 
@@ -186,6 +189,12 @@ def video_generation_func():
     by using the last frame of the previous video, and stitch all scenes
     into a single final video.
     """
+
+    final_video_storage_bucket_name = "marketing_agent_artifacts"
+    final_video_storage_bucket = storage_client.bucket(
+        bucket_name=final_video_storage_bucket_name
+    )
+
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "sub_agents", "script_writer_agent", "ad_script", "ad_video_script.json")
 
     with open(script_path, "r", encoding="utf-8") as f:
@@ -210,10 +219,10 @@ def video_generation_func():
             model="veo-3.0-generate-001",
             source=types.GenerateVideosSource(
                 prompt=str(scene),
-                image=initial_frame.as_image()
+                image=initial_frame.as_image(),
             ),
             config=types.GenerateVideosConfig(
-                output_gcs_uri="gs://marketing-agent-video-results"
+                output_gcs_uri="gs://video-results",
             ),
         )
 
@@ -278,11 +287,23 @@ def video_generation_func():
 
     print("Final stitched video with audio generated successfully.")
 
-    final_ad_video = types.Part.from_bytes(
-        data=video_bytes, mime_type="video/mp4"
+    # final_ad_video = types.Part.from_bytes(
+    #     data=video_bytes, mime_type="video/mp4"
+    # )
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S") 
+    destination_blob = f"ad_campaign_video/{timestamp}_{uuid.uuid4().hex[:8]}.mp4"
+    blob = final_video_storage_bucket.blob(destination_blob)
+    blob.upload_from_string(
+        data=video_bytes,
+        content_type="video/mp4"
     )
 
-    with open("generated_video.mp4", "wb") as file:
-        file.write(video_bytes)
+    # with open("generated_video.mp4", "wb") as file:
+    #     file.write(video_bytes)
 
-    return final_ad_video
+    # return final_ad_video
+
+    return {
+        "Status": "Ad campaign video generated successfully",
+        "Ad_Video_Campaign_Public_URL": f"https://storage.cloud.google.com/{final_video_storage_bucket_name}/{destination_blob}",
+    }

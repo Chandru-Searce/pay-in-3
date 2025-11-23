@@ -1,14 +1,21 @@
 # Import necassary packages
+import uuid
 from google import genai
 from google.genai import types
+from google.cloud.storage import Client
 from google.adk.tools import ToolContext
+from datetime import datetime, timezone
 from ..utils.text_remover import _remove_text_from_generated_image
 
 gemini_client = genai.Client(
         vertexai=True,
-        project="prj-in3-non-prod-svc-01",
+        project="prj-in3-prod-svc-01",
         location="europe-west4",
     )
+
+storage_client = Client(
+    project="prj-in3-prod-svc-01"
+)
 
 def _edit_linkedin_post(user_prompt: str, tool_context: ToolContext, aspect_ratio: str):
     """
@@ -32,9 +39,16 @@ def _edit_linkedin_post(user_prompt: str, tool_context: ToolContext, aspect_rati
         An object containing the edited linkedin post in PNG format as `inline_data`.
         If no image was generated, returns a string: "No image was generated."
     """
+    bucket_name = "marketing_agent_artifacts"
+    bucket = storage_client.bucket(
+        bucket_name=bucket_name
+    )
 
-    latest_linkedin_post = tool_context.state.get("latest_linkedin_post")
+    latest_linkedin_post_uri = tool_context.state.get("latest_linkedin_post_uri")
 
+    latest_linkedin_post = types.Part.from_uri(
+        file_uri=latest_linkedin_post_uri, mime_type="image/png"
+    )
     # Generate config
     generate_content_config = types.GenerateContentConfig(
         temperature=0.0,
@@ -83,11 +97,35 @@ def _edit_linkedin_post(user_prompt: str, tool_context: ToolContext, aspect_rati
     
     # with open("ad_campaign_image.png", "wb") as f:
     #     f.write(generated_image)
-        
-    edited_image_with_text = types.Part(inline_data=types.Blob(data=generated_image, mime_type="image/png"))
 
-    edited_image_without_text = _remove_text_from_generated_image(generated_image=edited_image_with_text)
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    destination_blob_with_text = f"linkedin_posts/{timestamp}_{uuid.uuid4().hex[:8]}_with_text_(edited).png"
+    blob = bucket.blob(destination_blob_with_text)
     
-    return edited_image_with_text, edited_image_without_text
+    blob.upload_from_string(
+        data=generated_image,
+        content_type="image/png"
+    )
+
+    linkedin_post_uri_edited_with_text = f"gs://{bucket_name}/{destination_blob_with_text}"
+
+    # edited_image_with_text = types.Part(inline_data=types.Blob(data=generated_image, mime_type="image/png"))
+
+    edited_image_without_text = _remove_text_from_generated_image(gcs_uri_with_text=linkedin_post_uri_edited_with_text)
+
+    destination_blob_without_text = f"linkedin_posts/{timestamp}_{uuid.uuid4().hex[:8]}_without_text_(edited).png"
+    blob = bucket.blob(destination_blob_without_text)
+    blob.upload_from_string(
+        data=edited_image_without_text,
+        content_type="image/png"
+    )
+
+    tool_context.state['latest_linkedin_post_uri'] = linkedin_post_uri_edited_with_text
+
+    return {
+        "Status": "Linkedin post edited successfully",
+        "With_Text_Public_URL": f"https://storage.cloud.google.com/{bucket_name}/{destination_blob_with_text}",
+        "Without_Text_Public_URL": f"https://storage.cloud.google.com/{bucket_name}/{destination_blob_without_text}"
+    }
 
     

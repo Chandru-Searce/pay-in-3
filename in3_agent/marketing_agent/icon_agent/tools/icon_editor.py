@@ -1,13 +1,20 @@
 # Import necassary packages
+import uuid
 from google import genai
 from google.genai import types
+from google.cloud.storage import Client
 from google.adk.tools import ToolContext
+from datetime import datetime, timezone
 
 gemini_client = genai.Client(
         vertexai=True,
-        project="prj-in3-non-prod-svc-01",
+        project="prj-in3-prod-svc-01",
         location="europe-west4",
     )
+
+storage_client = Client(
+    project="prj-in3-prod-svc-01"
+)
 
 def _edit_icon_design(user_prompt: str, tool_context: ToolContext):
     """
@@ -24,8 +31,14 @@ def _edit_icon_design(user_prompt: str, tool_context: ToolContext):
         An object containing the edited icon design in PNG format as `inline_data`.
         If no image was generated, returns a string: "No image was generated."
     """
+    bucket_name = "marketing_agent_artifacts"
+    bucket = storage_client.bucket(bucket_name=bucket_name)
 
-    latest_icon_generated = tool_context.state.get("latest_icon_generated")
+    latest_icon_generated_uri = tool_context.state.get("latest_icon_generated_uri")
+
+    latest_icon_generated = types.Part.from_uri(
+        file_uri=latest_icon_generated_uri, mime_type="image/png"
+    )
 
     # Generate config
     generate_content_config = types.GenerateContentConfig(
@@ -72,9 +85,18 @@ def _edit_icon_design(user_prompt: str, tool_context: ToolContext):
     
     # with open("ad_campaign_image.png", "wb") as f:
     #     f.write(generated_image)
-        
-    edited_image = types.Part(inline_data=types.Blob(data=generated_image, mime_type="image/png"))
-    
-    return edited_image
 
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    destination_blob = f"icons/{timestamp}_{uuid.uuid4().hex[:8]}_(edited).png"
+    blob = bucket.blob(destination_blob)
+    blob.upload_from_string(
+        data=generated_image,
+        content_type="image/png"
+    )
+
+    # edited_image = types.Part(inline_data=types.Blob(data=generated_image, mime_type="image/png"))
     
+    return {
+        "Status": "Icon edited successfully",
+        "Edited_Icon_Public_URL": f"https://storage.cloud.google.com/{bucket_name}/{destination_blob}",
+    }

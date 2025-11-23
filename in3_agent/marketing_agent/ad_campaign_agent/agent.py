@@ -22,5 +22,5 @@ root_agent = LlmAgent(
         top_p=1.0
     ),
     tools=[_ad_campaign_generator_function, _edit_ad_campaign_post],
-    after_tool_callback=after_tool_callback_func,
+    # after_tool_callback=after_tool_callback_func,
 )

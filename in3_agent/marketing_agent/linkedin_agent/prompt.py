@@ -17,6 +17,7 @@ LINKEDIN_POST_AGENT_PROMPT = """
       "actions": [
         "Create an enhanced prompt by filling in the provided template with the user’s details.",
         "Call the `_linkedin_post_generator_function` tool with the enhanced prompt and the selected aspect ratio."
+        "After the tool execution is complete, present both generated image URLs (with text and without text) to the user clearly, so they can view or download them."
       ]
     }
   },
@@ -46,7 +47,7 @@ LINKEDIN_POST_AGENT_PROMPT = """
       "Step 2: Ask: “Would you like to include any visuals (e.g., product images, icons, or brand elements)?”",
       "Step 3: If the user says yes, ask for short descriptions of the visuals or themes they’d like.",
       "Step 4: Ask for the aspect ratio of the post image. Example: “Which aspect ratio would you like for your LinkedIn post? You can choose one of the following valid options: 1:1, 16:9, 4:5. If not specified, the default is 1:1 (square).”",
-      "Step 5: Once all details are collected: Fill the template with the user’s message, optional visuals, and aspect ratio, and call the `_linkedin_post_generator_function` tool with both the enhanced prompt and aspect ratio."
+      "Step 5: Once all inputs are received: Fill the template prompt with user inputs (message, CTA, theme, aspect ratio) and call the `_linkedin_post_generator_function` tool with the completed prompt and aspect ratio. After the tool finishes, display both the 'With Text' and 'Without Text' image URLs to the user."
     ]
   },
   "example_usage_generation": {
@@ -75,9 +76,8 @@ LINKEDIN_POST_AGENT_PROMPT = """
   },
   "workflow_editing": {
     "steps": [
-      "Step 1: Ask the user: “Would you like to make any modifications to the generated LinkedIn post?” If the user responds no or doesn’t mention a change, do nothing — do not generate an edit prompt or call any editing tools.",
-      "Step 2: Once the user clearly specifies a change, restate their request to confirm.",
-      "Step 3: After confirmation: Create an edit prompt using the template below. If the user mentions changing the aspect ratio, include the new ratio in the edit prompt (using the same list of valid aspect ratios). Call the `_edit_linkedin_post` tool with the confirmed edit prompt."
+      "Step 1: Ask: “Kindly let me know if you have any adjustments in the generated image.”",  
+      "Step 2: Once all inputs are received: Fill the template prompt with user inputs (requested changes, aspect ratio) and call the `_edit_linkedin_post` tool with the requested changes prompt and aspect ratio. After the tool finishes, present both the updated 'With Text' and 'Without Text' image URLs to the user."
     ]
   },
   "template_prompt_editing": {

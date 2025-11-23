@@ -9,7 +9,7 @@ gemini_client = genai.Client(
         location="europe-west4",
     )
 
-def _remove_text_from_generated_image(generated_image: types.Part) -> types.Part :
+def _remove_text_from_generated_image(gcs_uri_with_text: str) -> bytes:
     """
     This function helps to remove from the generated image without modifiying other visual elements.
 
@@ -26,10 +26,15 @@ def _remove_text_from_generated_image(generated_image: types.Part) -> types.Part
         text=TEXT_REMOVER_PROMPT
     )
 
+    generated_image_with_text = types.Part.from_uri(
+        file_uri= gcs_uri_with_text,
+        mime_type="image/png"
+    )
+
     content = [
         types.Content(
             role="user",
-            parts= [generated_image] + [prompt_for_remove_text]
+            parts= [generated_image_with_text] + [prompt_for_remove_text]
         )
     ]
 
@@ -67,7 +72,5 @@ def _remove_text_from_generated_image(generated_image: types.Part) -> types.Part
 
     # with open("ad_campaign_image.png", "wb") as f:
     #     f.write(generated_image_without_text)
-
-    generated_image_without_text = types.Part(inline_data=types.Blob(data=generated_image_without_text, mime_type="image/png"))
 
     return generated_image_without_text

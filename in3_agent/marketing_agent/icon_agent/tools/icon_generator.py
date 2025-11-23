@@ -1,17 +1,20 @@
 # Import necassary packages
+import uuid
 import random
 from google import genai
 from google.genai import types
 from google.cloud import storage
+from datetime import datetime, timezone
+from google.adk.tools import ToolContext
 
 gemini_client = genai.Client(
         vertexai=True,
-        project="prj-in3-non-prod-svc-01",
+        project="prj-in3-prod-svc-01",
         location="europe-west4",
     )
 
 storage_client = storage.Client(
-        project="prj-in3-non-prod-svc-01"
+        project="prj-in3-prod-svc-01"
     )
 
 def _get_relevant_icon_images():
@@ -23,9 +26,8 @@ def _get_relevant_icon_images():
             A list of matching file names (including their full paths within the bucket).
             Returns an empty list if no files are found.
     """
-
-    bucket_name = "brand-guidelines-in3"
-    folder = "brand_guidelines/images/"
+    bucket_name = "in3-brand-guidelines"
+    folder = "Brand guidelines /images/"
     starts_with = ['icon']
 
     results = []
@@ -36,7 +38,7 @@ def _get_relevant_icon_images():
         search_prefix = f"{folder.rstrip('/')}/{prefix}"
         blobs = storage_client.list_blobs(bucket_name, prefix=search_prefix)
         for blob in blobs:
-            results.append("gs://brand-guidelines-in3/"+blob.name)
+            results.append("gs://in3-brand-guidelines/"+blob.name)
 
     if results:
         selected = random.sample(results, min(len(results), 3))
@@ -47,7 +49,7 @@ def _get_relevant_icon_images():
         print("No files found.")
         return []
     
-def _icon_generator_function(input_text: str): 
+def _icon_generator_function(input_text: str, tool_context: ToolContext): 
     """
     Use this tool to generate icon images using the Gemini model.
 
@@ -59,6 +61,11 @@ def _icon_generator_function(input_text: str):
         types.Part: 
             A generated image as types.Part objects.
     """
+    bucket_name = "marketing_agent_artifacts"
+    bucket = storage_client.bucket(
+        bucket_name=bucket_name
+    )
+
     # Prepare image parts dynamically based on input list
     reference_images_uri = _get_relevant_icon_images()
     image_parts = []
@@ -121,6 +128,26 @@ def _icon_generator_function(input_text: str):
     # with open("icon_generated.png", "wb") as f:
     #     f.write(generated_image)
         
-    generated_image = types.Part(inline_data=types.Blob(data=generated_image, mime_type="image/png"))
+    # generated_image = types.Part(inline_data=types.Blob(data=generated_image, mime_type="image/png"))
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    destination_blob = f"icons/{timestamp}_{uuid.uuid4().hex[:8]}.png"
+    blob = bucket.blob(destination_blob)
+    blob.upload_from_string(
+        data=generated_image,
+        content_type="image/png"
+    )
+
+    # --- Construct final URIs ---
+    icon_gcs_uri = f"gs://{bucket_name}/{destination_blob}"
+
+    # --- Update tool context state ---
+    tool_context.state["latest_icon_generated_uri"] = icon_gcs_uri
     
-    return generated_image
+    # return generated_image
+
+    # --- Return structured response ---
+    return {
+        "Status": "Icon generation completed successfully",
+        "Generated_Icon_Public_URL": f"https://storage.cloud.google.com/{bucket_name}/{destination_blob}",
+    }

@@ -13,7 +13,7 @@ from .video_generation_agent import video_generation_agent
 
 
 gcs_artifact_service = GcsArtifactService(
-    bucket_name="marketing-agent-image-results"
+    bucket_name="marketing_agent_artifacts"
     )
 
 root_agent = LlmAgent(
@@ -35,7 +35,7 @@ root_agent = LlmAgent(
 
 runner = Runner(
     agent=root_agent,
-    app_name="marketing_agent_app",
+    app_name="marketing_agent",
     session_service=InMemorySessionService(),
     artifact_service=gcs_artifact_service
 )

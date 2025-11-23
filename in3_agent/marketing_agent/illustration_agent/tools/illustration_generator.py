@@ -1,17 +1,20 @@
 # Import necassary packages
+import uuid
 import random
 from google import genai
 from google.genai import types
 from google.cloud import storage
+from datetime import timezone, datetime
+from google.adk.tools import ToolContext
 
 gemini_client = genai.Client(
         vertexai=True,
-        project="prj-in3-non-prod-svc-01",
+        project="prj-in3-prod-svc-01",
         location="europe-west4",
     )
 
 storage_client = storage.Client(
-        project="prj-in3-non-prod-svc-01"
+        project="prj-in3-prod-svc-01"
     )
 
 def _get_relevant_illustration_images():
@@ -24,8 +27,8 @@ def _get_relevant_illustration_images():
             Returns an empty list if no files are found.
     """
 
-    bucket_name = "brand-guidelines-in3"
-    folder = "brand_guidelines/images/"
+    bucket_name = "in3-brand-guidelines"
+    folder = "Brand guidelines /images/"
     starts_with = ['visual']
 
     results = []
@@ -36,7 +39,7 @@ def _get_relevant_illustration_images():
         search_prefix = f"{folder.rstrip('/')}/{prefix}"
         blobs = storage_client.list_blobs(bucket_name, prefix=search_prefix)
         for blob in blobs:
-            results.append("gs://brand-guidelines-in3/"+blob.name)
+            results.append("gs://in3-brand-guidelines/"+blob.name)
 
     if results:
         selected = random.sample(results, min(len(results), 3))
@@ -47,7 +50,7 @@ def _get_relevant_illustration_images():
         print("No files found.")
         return []
 
-def _illustration_generator_function(input_text: str, aspect_ratio: str): 
+def _illustration_generator_function(input_text: str, aspect_ratio: str, tool_context: ToolContext): 
     """
     Use this tool to generate illustration images using the Gemini model.
 
@@ -68,6 +71,10 @@ def _illustration_generator_function(input_text: str, aspect_ratio: str):
             A generated image as types.Part objects.
     """
     # Prepare image parts dynamically based on input list
+    bucket_name = "marketing_agent_artifacts"
+    bucket = storage_client.bucket(
+        bucket_name=bucket_name
+    )
 
     reference_images_uri = _get_relevant_illustration_images()
     image_parts = []
@@ -133,6 +140,26 @@ def _illustration_generator_function(input_text: str, aspect_ratio: str):
     # with open("illustration_generated.png", "wb") as f:
     #     f.write(generated_image)
         
-    generated_image = types.Part(inline_data=types.Blob(data=generated_image, mime_type="image/png"))
+    # generated_image = types.Part(inline_data=types.Blob(data=generated_image, mime_type="image/png"))
     
-    return generated_image
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    destination_blob = f"illustrations/{timestamp}_{uuid.uuid4().hex[:8]}.png"
+    blob = bucket.blob(destination_blob)
+    blob.upload_from_string(
+        data=generated_image,
+        content_type="image/png"
+    )
+
+    # --- Construct final URIs ---
+    illustration_gcs_uri = f"gs://{bucket_name}/{destination_blob}"
+
+    # --- Update tool context state ---
+    tool_context.state["latest_illustration_uri"] = illustration_gcs_uri
+
+    # return generated_image
+
+    # --- Return structured response ---
+    return {
+        "Status": "Illustration generation completed successfully",
+        "Generated_Illustration_Public_URL": f"https://storage.cloud.google.com/{bucket_name}/{destination_blob}",
+    }

@@ -26,5 +26,5 @@ root_agent = LlmAgent(
     ),
     sub_agents=[objective_finder_agent, script_writer_agent],
     tools=[video_generation_func],
-    after_tool_callback=_return_generated_ad_campaign_video
+    # after_tool_callback=_return_generated_ad_campaign_video
 )

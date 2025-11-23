@@ -4,7 +4,7 @@ from google.genai.types import Part
 from google.adk.tools import FunctionTool
 from google.adk.tools.tool_context import ToolContext
 
-async def _return_generated_illustrations(
+async def _return_generated_linkedin_post(
     tool: FunctionTool,
     args: Dict[str, Any],
     tool_response: List[Part],

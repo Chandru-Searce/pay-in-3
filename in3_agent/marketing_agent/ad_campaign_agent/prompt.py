@@ -17,7 +17,8 @@ ADD_CAMPAIGN_AGENT_PROMPT = """
       "description": "Once all inputs are received, construct the enhanced prompt and generate the ad.",
       "actions": [
         "Create an enhanced prompt by filling in the provided template with the user’s inputs.",
-        "Call the `_ad_campaign_generator_function` tool with the enhanced prompt and the selected aspect ratio."
+        "Call the `_ad_campaign_generator_function` tool with the enhanced prompt and the selected aspect ratio.",
+        "After the tool execution is complete, present both generated image URLs (with text and without text) to the user clearly, so they can view or download them."
       ]
     }
   },
@@ -50,7 +51,7 @@ ADD_CAMPAIGN_AGENT_PROMPT = """
       "Step 2: Ask: “What should be the call-to-action button text?”",
       "Step 3: If needed, ask: “Do you have a specific target audience or theme for this campaign?”",
       "Step 4: Ask: “Which aspect ratio would you like for the ad image? You can choose one of the following valid options: 1:1, 16:9, 4:5. If not specified, the default will be 1:1 (square).”",
-      "Step 5: Once all inputs are received: Fill the template prompt with user inputs (message, CTA, theme, aspect ratio) and call the `_ad_campaign_generator_function` tool with the completed prompt and aspect ratio."
+      "Step 5: Once all inputs are received: Fill the template prompt with user inputs (message, CTA, theme, aspect ratio) and call the `_ad_campaign_generator_function` tool with the completed prompt and aspect ratio. After the tool finishes, display both the 'With Text' and 'Without Text' image URLs to the user."
     ]
   },
   "example_usage_generation": {
@@ -85,7 +86,7 @@ ADD_CAMPAIGN_AGENT_PROMPT = """
   "workflow_editing": {
     "steps": [
       "Step 1: Ask: “Kindly let me know if you have any adjustments in the generated image.”",
-      "Step 5: Once all inputs are received: Fill the template prompt with user inputs (requested changes, aspect ratio) and call the `_edit_ad_campaign_post` tool with the requested changes prompt and aspect ratio."
+      "Step 2: Once all inputs are received: Fill the template prompt with user inputs (requested changes, aspect ratio) and call the `_edit_ad_campaign_post` tool with the requested changes prompt and aspect ratio. After the tool finishes, present both the updated 'With Text' and 'Without Text' image URLs to the user."
     ]
   },
   "template_prompt_editing": {

@@ -1,13 +1,21 @@
 # Import necassary packages
+import uuid
+import base64
 from google import genai
 from google.genai import types
+from datetime import datetime, timezone
+from google.cloud.storage import Client
 from google.adk.tools import ToolContext
 
 gemini_client = genai.Client(
         vertexai=True,
-        project="prj-in3-non-prod-svc-01",
+        project="prj-in3-prod-svc-01",
         location="europe-west4",
     )
+
+storage_client = Client(
+    project="prj-in3-prod-svc-01"
+)
 
 def _edit_illustration_design(user_prompt: str, tool_context: ToolContext, aspect_ratio: str):
     """
@@ -33,9 +41,17 @@ def _edit_illustration_design(user_prompt: str, tool_context: ToolContext, aspec
         An object containing the edited illustration design in PNG format as `inline_data`.
         If no image was generated, returns a string: "No image was generated."
     """
+    bucket_name = "marketing_agent_artifacts"
+    bucket = storage_client.bucket(
+        bucket_name=bucket_name
+    )
 
-    latest_illustration = tool_context.state.get("latest_illustration")
+    latest_illustration_uri = tool_context.state.get("latest_illustration_uri")
 
+    latest_illustration = types.Part.from_uri(
+        file_uri=latest_illustration_uri, mime_type="image/png"
+    )
+    
     # Generate config
     generate_content_config = types.GenerateContentConfig(
         temperature=0.0,
@@ -85,8 +101,19 @@ def _edit_illustration_design(user_prompt: str, tool_context: ToolContext, aspec
     # with open("ad_campaign_image.png", "wb") as f:
     #     f.write(generated_image)
         
-    edited_image = types.Part(inline_data=types.Blob(data=generated_image, mime_type="image/png"))
+    # edited_image = types.Part(inline_data=types.Blob(data=generated_image, mime_type="image/png"))
     
-    return edited_image
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    destination_blob = f"illustrations/{timestamp}_{uuid.uuid4().hex[:8]}_(edited).png"
+    blob = bucket.blob(destination_blob)
+    blob.upload_from_string(
+        data=generated_image,
+        content_type="image/png"
+    )
 
-    
+    # return edited_image
+
+    return {
+        "Status": "Illustration edited successfully",
+        "Edited_Illustration_Public_URL": f"https://storage.cloud.google.com/{bucket_name}/{destination_blob}",
+    }

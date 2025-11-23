@@ -16,6 +16,7 @@ test/
 # Folders to exclude
 in3_agent/agent_engine_deployment/
 in3_agent/register_to_agentspace/
+in3_agent/update_to_agentspace/
 notebooks/
 
 # Dockerfile
@@ -27,3 +28,12 @@ uv.lock
 
 # .sh file
 deploy_to_artifact_registry.sh
+
+# Unnecassary files
+in3_agent/sales_agent/dev.ipynb
+in3_agent/sales_agent/tools/filter_ecommerce.py
+in3_agent/sales_agent/tools/filters/location_filter.py
+in3_agent/sales_agent/tools/filters/payment_filter.py
+in3_agent/sales_agent/tools/filters/service.py
+marketing_agent_deployment.py
+sales_agent_deployment.py

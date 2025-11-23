@@ -41,7 +41,7 @@ class VideoScript(BaseModel):
 # Gemini Client Initialization
 gemini_client = genai.Client(
     vertexai=True,
-    project="prj-in3-non-prod-svc-01",
+    project="prj-in3-prod-svc-01",
     location="europe-west4",
 )
 

@@ -27,5 +27,5 @@ root_agent = LlmAgent(
         top_p=1.0
     ),
     tools=[_illustration_generator_function, _edit_illustration_design],
-    after_tool_callback=_return_generated_illustrations
+    # after_tool_callback=_return_generated_illustrations
 )
