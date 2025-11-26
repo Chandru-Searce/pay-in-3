@@ -1,9 +1,12 @@
-# Import necassary packages
+# 
+
+# Import necessary packages
 import os
 import json
 import requests
 from typing import List, Tuple
 from dotenv import load_dotenv
+from google.cloud import storage
 
 # Load env variables
 load_dotenv()
@@ -12,36 +15,55 @@ load_dotenv()
 APOLLO_API_KEY = os.getenv("APOLLO_API_KEY2")
 PEOPLE_SEARCH_API_URL = os.getenv("PEOPLE_SEARCH_API")
 
-PAGE_TRACKER_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lead_data", "page-tracker.json")
+# GCS bucket settings
+GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")          # Your bucket name
+GCS_PAGE_TRACKER_BLOB = "page-tracker.json"             # Path in bucket
+
 BATCH_SIZE = 5
 MAX_PAGE = 2000
 
-# Filter crieterias
-person_titles :List[str] = ["E-commerce Manager","Marketing Manager", "Sales Manager"]
-organization_location :List[str] = ["netherlands"]
+# Filter criteria
+person_titles: List[str] = ["E-commerce Manager", "Marketing Manager", "Sales Manager"]
+organization_location: List[str] = ["netherlands"]
 
 DETINATION_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lead_data", "people-info.json")
 
-# ---------------------- PAGE TRACKING FUNCTIONS ----------------------
+
+# ---------------------- GCS UTILITY FUNCTIONS ----------------------
+
+def _get_gcs_client():
+    return storage.Client()
+
 
 def _load_visited_ranges() -> List[Tuple[int, int]]:
-    """Load visited page ranges from file. If not found, return empty list."""
-    if not os.path.exists(PAGE_TRACKER_FILE):
+    """Load visited page ranges from GCS JSON file."""
+    client = _get_gcs_client()
+    bucket = client.bucket(GCS_BUCKET_NAME)
+    blob = bucket.blob(GCS_PAGE_TRACKER_BLOB)
+
+    if not blob.exists():
         return []
-    with open(PAGE_TRACKER_FILE, "r") as f:
-        return json.load(f)
+
+    data = blob.download_as_text()
+    return json.loads(data)
 
 
 def _save_visited_ranges(ranges: List[Tuple[int, int]]):
-    """Save visited ranges to JSON file."""
-    with open(PAGE_TRACKER_FILE, "w") as f:
-        json.dump(ranges, f, indent=4)
+    """Save visited page ranges to GCS JSON file."""
+    client = _get_gcs_client()
+    bucket = client.bucket(GCS_BUCKET_NAME)
+    blob = bucket.blob(GCS_PAGE_TRACKER_BLOB)
+
+    blob.upload_from_string(
+        json.dumps(ranges, indent=4),
+        content_type="application/json"
+    )
 
 
 def _get_next_page_range() -> Tuple[int, int]:
     """
     Returns the next page range (5 pages at a time)
-    and ensures it will never give the same range again.
+    and ensures it never gives the same range twice.
     """
     visited = _load_visited_ranges()
 
@@ -56,11 +78,11 @@ def _get_next_page_range() -> Tuple[int, int]:
 
     end = min(start + BATCH_SIZE - 1, MAX_PAGE)
 
-    # Store range
     visited.append([start, end])
     _save_visited_ranges(visited)
 
     return start, end
+
 
 # ---------------------- APOLLO SCRAPER FUNCTION ----------------------
 
@@ -107,7 +129,7 @@ def _scrape_apollo_pages(start_page: int, end_page: int):
                 "person_first_name": person.get("first_name", ""),
                 "person_last_name": person.get("last_name", ""),
                 "person_email": person.get("email", ""),
-                "person_phone_number": org.get("primary_phone", {}).get("number", ""),
+                "organization_phone_number": org.get("primary_phone", {}).get("number", ""),
                 "person_linkedin_url": person.get("linkedin_url", ""),
                 "person_facebook_url": person.get("facebook_url", ""),
                 "person_github_url": person.get("github_url", "")
@@ -115,7 +137,7 @@ def _scrape_apollo_pages(start_page: int, end_page: int):
 
             lead_list.append(lead)
 
-    # Save results
+    # Save results locally (you can also move this to GCS if you want)
     with open(DETINATION_FILE_PATH, "w") as f:
         json.dump(lead_list, f, indent=4)
 

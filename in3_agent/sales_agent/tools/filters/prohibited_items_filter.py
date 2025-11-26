@@ -1,4 +1,6 @@
 # Import necessary packages
+import os
+import json
 from google import genai
 from typing import Literal
 from dotenv import load_dotenv
@@ -78,6 +80,7 @@ def _safe_check_for_prohibited_items(lead):
 
     return None
 
+DESTINATION_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "lead_data", "final-leads-without-enrichment.json")
 
 # Main filtering function
 def _process_prohibted_items_filter(price_filtering_leads: list):
@@ -96,4 +99,9 @@ def _process_prohibted_items_filter(price_filtering_leads: list):
             if result is not None:
                 prohibited_no_leads.append(result)
     print("Prohibited items checking completed sucessfully")
+
+    # Save results
+    with open(DESTINATION_FILE_PATH, "w") as f:
+        json.dump(prohibited_no_leads, f, indent=4)
+
     return prohibited_no_leads

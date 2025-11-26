@@ -44,7 +44,6 @@ def _people_enrichment(lead_data_without_enrichment):
 
         try:
             data = response.json()
-            print(data)
         except Exception:
             print(f"❌ Failed to parse JSON for page")
             continue
@@ -59,18 +58,18 @@ def _people_enrichment(lead_data_without_enrichment):
             org = person.get("organization", {})
 
             lead = {
-                "lead_title": f"{org.get('name', '')} - Lead",
-                "organization_name": org.get("name", ""),
-                "organization_id": person.get("organization_id", ""),
+                "lead_title": f"{lead.get("organization_name", "")} - Lead",
+                "organization_name": org.get("name", lead.get("organization_name", "")),
+                "organization_id": person.get("organization_id", lead.get("organization_id", "")),
                 "website_url": org.get("website_url", ""),
                 "person_name": person.get("name", ""),
                 "person_first_name": person.get("first_name", ""),
                 "person_last_name": person.get("last_name", ""),
                 "person_email": person.get("email", ""),
-                "person_phone_number": org.get("primary_phone", {}).get("number", ""),
-                "person_linkedin_url": person.get("linkedin_url", ""),
-                "person_facebook_url": person.get("facebook_url", ""),
-                "person_github_url": person.get("github_url", "")
+                "organization_phone_number": org.get("primary_phone", {}).get("number", ""),
+                "person_linkedin_url": person.get("linkedin_url", lead.get("person_linkedin_url", "")),
+                "person_linkedin_url": person.get("facebook_url", lead.get("person_linkedin_url", "")),
+                "person_github_url": person.get("github_url", lead.get("person_github_url", ""))
             }
 
             lead_list.append(lead)

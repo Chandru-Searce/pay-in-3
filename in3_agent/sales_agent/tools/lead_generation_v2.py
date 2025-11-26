@@ -110,7 +110,7 @@ def _lead_generation(max_leads: int = 100):
 
     if is_empty == False:
 
-        for idx, lead in enumerate(lead_data.get("contacts", [])):
+        for idx, lead in enumerate(lead_data):
             if max_leads and idx >= max_leads:
                 logger.info(f"Reached processing limit of {max_leads} leads, stopping.")
                 break
@@ -119,7 +119,7 @@ def _lead_generation(max_leads: int = 100):
             org_name = lead.get("organization_name") or "unknown_organization"
             person_name = lead.get("person_name") or "unknown_person"
             person_email = lead.get("person_email") or None
-            person_phone = lead.get("person_phone_number") or None
+            person_phone = lead.get("organization_phone_number") or None
             lead_title = lead.get("lead_title") or "unknown_lead"
 
             # Step 1: Ensure organization exists
