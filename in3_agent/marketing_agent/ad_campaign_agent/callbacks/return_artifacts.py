@@ -3,14 +3,11 @@ import datetime
 from google.auth import default
 from typing import Dict, Any, List
 from google.genai.types import Part
-from google.cloud.storage import Client
 from google.adk.tools import FunctionTool
+from ...utils.storage_client import storage_client
 from google.adk.tools.tool_context import ToolContext
 
 credentials, _ = default()
-storage_client = Client(
-    project="prj-in3-prod-svc-01",
-)
 
 async def upload_to_gcs(
         image_object: Part,

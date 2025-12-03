@@ -2,12 +2,13 @@
 from google import genai
 from google.genai import types
 from .prompt import TEXT_REMOVER_PROMPT
+from ...utils.gemini_client import gemini_client
 
-gemini_client = genai.Client(
-        vertexai=True,
-        project="prj-in3-prod-svc-01",
-        location="europe-west4",
-    )
+# gemini_client = genai.Client(
+#         vertexai=True,
+#         project="prj-in3-prod-svc-01",
+#         location="europe-west4",
+#     )
 
 def _remove_text_from_generated_image(gcs_uri_with_text: str) -> bytes:
     """

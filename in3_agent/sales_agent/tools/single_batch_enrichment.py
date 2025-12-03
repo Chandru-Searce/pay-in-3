@@ -66,6 +66,7 @@ def _people_enrichment(lead_data_without_enrichment):
                 "person_first_name": person.get("first_name", ""),
                 "person_last_name": person.get("last_name", ""),
                 "person_email": person.get("email", ""),
+                "person_title": person.get("title", ""),
                 "organization_phone_number": org.get("primary_phone", {}).get("number", ""),
                 "person_linkedin_url": person.get("linkedin_url", lead.get("person_linkedin_url", "")),
                 "person_linkedin_url": person.get("facebook_url", lead.get("person_linkedin_url", "")),

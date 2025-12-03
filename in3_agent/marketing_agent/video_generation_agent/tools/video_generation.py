@@ -11,23 +11,25 @@ from google.genai import types
 from datetime import datetime, timezone
 from .prompt import INITIAL_FRAME_GENERATION_PROMPT
 from moviepy import VideoFileClip, concatenate_videoclips
-from google.genai.types import VideoGenerationReferenceImage, VideoGenerationReferenceType
+from ...utils.gemini_client import gemini_client
+from ...utils.storage_client import storage_client
+from ...utils.veo_client import veo_client
 
-gemini_client = Client(
-    vertexai=True,
-    project="prj-in3-prod-svc-01",
-    location="europe-west4",
-)
+# gemini_client = Client(
+#     vertexai=True,
+#     project="prj-in3-prod-svc-01",
+#     location="europe-west4",
+# )
 
-veo_client = Client(
-    vertexai=True,
-    project="prj-in3-prod-svc-01",
-    location="us-central1",
-)
+# veo_client = Client(
+#     vertexai=True,
+#     project="prj-in3-prod-svc-01",
+#     location="us-central1",
+# )
 
-storage_client = storage.Client(
-    project="prj-in3-prod-svc-01"
-)
+# storage_client = storage.Client(
+#     project="prj-in3-prod-svc-01"
+# )
 
 def _generate_prompt_for_initial_frame():
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "sub_agents", "script_writer_agent", "ad_script", "ad_video_script.json")

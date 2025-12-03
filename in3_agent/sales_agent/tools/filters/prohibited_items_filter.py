@@ -1,22 +1,17 @@
 # Import necessary packages
 import os
-import json
 from google import genai
 from typing import Literal
 from dotenv import load_dotenv
 from pydantic import BaseModel
-from google.genai.types import HttpOptions
+from ..utils.gemini_client import gemini_client
 from google.genai.types import GenerateContentConfig
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+# Load env variables
 load_dotenv()
 
-client = genai.Client(
-    http_options=HttpOptions(api_version="v1"),
-    vertexai=True,
-    project="prj-in3-prod-svc-01",
-    location="europe-west4",
-)
+client = gemini_client
 
 # Response Schema
 class OutputSchema(BaseModel):
@@ -98,10 +93,13 @@ def _process_prohibted_items_filter(price_filtering_leads: list):
             result = future.result()
             if result is not None:
                 prohibited_no_leads.append(result)
+    
     print("Prohibited items checking completed sucessfully")
 
-    # Save results
-    with open(DESTINATION_FILE_PATH, "w") as f:
-        json.dump(prohibited_no_leads, f, indent=4)
+    # # Save results
+    # with open(DESTINATION_FILE_PATH, "w") as f:
+    #     json.dump(prohibited_no_leads, f, indent=4)
 
-    return prohibited_no_leads
+    domain_list = [company['primary_domain'] for company in prohibited_no_leads]
+
+    return domain_list

@@ -5,17 +5,19 @@ from google.genai import types
 from google.cloud.storage import Client
 from google.adk.tools import ToolContext
 from datetime import datetime, timezone
+from ...utils.gemini_client import gemini_client
+from ...utils.storage_client import storage_client
 from ..utils.text_remover import _remove_text_from_generated_image
 
-gemini_client = genai.Client(
-        vertexai=True,
-        project="prj-in3-prod-svc-01",
-        location="europe-west4",
-    )
+# gemini_client = genai.Client(
+#         vertexai=True,
+#         project="prj-in3-prod-svc-01",
+#         location="europe-west4",
+#     )
 
-storage_client = Client(
-    project="prj-in3-prod-svc-01"
-)
+# storage_client = Client(
+#     project="prj-in3-prod-svc-01"
+# )
 
 def _edit_linkedin_post(user_prompt: str, tool_context: ToolContext, aspect_ratio: str):
     """

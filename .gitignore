@@ -9,6 +9,7 @@
 backup_in3/
 in3_agent/.env
 in3_agent/sales_agent_copy
+in3_agent/sales_agent/tools_backup
 
 # test folder
 test/
@@ -21,6 +22,7 @@ notebooks/
 
 # Dockerfile
 Dockerfile
+dockerignore
 
 # Project management files
 pyproject.toml
@@ -35,5 +37,9 @@ in3_agent/sales_agent/tools/filter_ecommerce.py
 in3_agent/sales_agent/tools/filters/location_filter.py
 in3_agent/sales_agent/tools/filters/payment_filter.py
 in3_agent/sales_agent/tools/filters/service.py
+in3_agent/sales_agent/tools_copy/filter_ecommerce.py
+in3_agent/sales_agent/tools_copy/filters/location_filter.py
+in3_agent/sales_agent/tools_copy/filters/payment_filter.py
+in3_agent/sales_agent/tools_copy/filters/service.py
 marketing_agent_deployment.py
 sales_agent_deployment.py

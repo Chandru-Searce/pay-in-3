@@ -1,15 +1,10 @@
 # Import necassary packages
-import os
-from google.genai import Client, types
+from .utils.gemini_client import gemini_client
 from google.genai.types import GoogleSearch, Tool, GenerateContentConfig
 from ..prompt import SYSTEM_INSTRUCTION_FOR_EMAIL_TEMPLATE_GENERATION
 
 # Initialize client
-gemini_client = Client(
-    project="prj-in3-prod-svc-01",
-    location="europe-west4",
-    vertexai=True
-)
+gemini_client = gemini_client
 
 def _email_template_generator(user_input: str):
     """

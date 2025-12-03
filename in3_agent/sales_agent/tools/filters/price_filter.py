@@ -1,30 +1,25 @@
 # Import necessary packages
 import os
 import json
-from google import genai
 from typing import Literal
 from dotenv import load_dotenv
 from pydantic import BaseModel
-from google.genai.types import HttpOptions
-from google.genai.types import GenerateContentConfig, Tool, GoogleSearch
+from ..utils.gemini_client import gemini_client
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from google.genai.types import GenerateContentConfig, Tool, GoogleSearch
 
+# Environment variables
 load_dotenv()
 
 SOURCE_FILE_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
-    "..", "..", "lead_data", "people-info.json"
+    "..", "..", "lead_data", "company-info.json"
 )
 
 with open(SOURCE_FILE_PATH, "r", encoding="utf-8") as file:
     lead_data = json.load(file) 
 
-client = genai.Client(
-    http_options=HttpOptions(api_version="v1"),
-    vertexai=True,
-    project="prj-in3-prod-svc-01",
-    location="europe-west4",
-)
+client = gemini_client
 
 # Response Schema
 class OutputSchema(BaseModel):
