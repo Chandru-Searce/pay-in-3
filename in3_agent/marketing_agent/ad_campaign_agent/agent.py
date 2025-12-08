@@ -3,7 +3,6 @@ from google.adk.agents import LlmAgent
 from .prompt import ADD_CAMPAIGN_AGENT_PROMPT
 from google.genai.types import GenerateContentConfig
 from .tools.ad_campaign_editor import _edit_ad_campaign_post
-from .callbacks.return_artifacts import after_tool_callback_func
 from .tools.ad_campaign_generator import _ad_campaign_generator_function
 
 root_agent = LlmAgent(
@@ -16,11 +15,6 @@ root_agent = LlmAgent(
     """,
     instruction=ADD_CAMPAIGN_AGENT_PROMPT,
     model="gemini-2.5-pro",
-    generate_content_config=GenerateContentConfig(
-        temperature=0.2,
-        top_k=2,
-        top_p=1.0
-    ),
+    generate_content_config=GenerateContentConfig(temperature=0.2, top_k=2, top_p=1.0),
     tools=[_ad_campaign_generator_function, _edit_ad_campaign_post],
-    # after_tool_callback=after_tool_callback_func,
 )

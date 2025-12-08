@@ -1,11 +1,9 @@
 # Import necassary packages
 from google.adk.agents import LlmAgent
-from google.genai.types import GenerateContentConfig
 from .prompt import LINKEDIN_POST_AGENT_PROMPT
-from .tools.linkedin_post_generator import _linkedin_post_generator_function
+from google.genai.types import GenerateContentConfig
 from .tools.linkedin_post_editor import _edit_linkedin_post
-from .callbacks.return_artifacts import _return_generated_linkedin_post
-
+from .tools.linkedin_post_generator import _linkedin_post_generator_function
 
 root_agent = LlmAgent(
     name="linkedin_agent",
@@ -18,11 +16,6 @@ root_agent = LlmAgent(
     """,
     instruction=LINKEDIN_POST_AGENT_PROMPT,
     model="gemini-2.5-pro",
-    generate_content_config=GenerateContentConfig(
-        temperature=0.2,
-        top_k=2,
-        top_p=1.0
-    ),
+    generate_content_config=GenerateContentConfig(temperature=0.2, top_k=2, top_p=1.0),
     tools=[_linkedin_post_generator_function, _edit_linkedin_post],
-    # after_tool_callback=_return_generated_linkedin_post
 )

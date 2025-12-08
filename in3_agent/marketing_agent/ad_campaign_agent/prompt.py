@@ -125,5 +125,4 @@ ADD_CAMPAIGN_AGENT_PROMPT = """
     ]
   }
 }
-
 """

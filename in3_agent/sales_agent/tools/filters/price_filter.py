@@ -13,7 +13,7 @@ load_dotenv()
 
 SOURCE_FILE_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
-    "..", "..", "lead_data", "company-info.json"
+    "..", "..", "lead_data", "webshop_urls.json"
 )
 
 with open(SOURCE_FILE_PATH, "r", encoding="utf-8") as file:
@@ -26,11 +26,10 @@ class OutputSchema(BaseModel):
     answer: Literal["yes", "no"]
     
 # Keep your original function EXACTLY as-is (you said it's working)
-def _is_products_between_fifty_and_five_thousand(org_name: str, website_url: str):
+def _is_products_between_fifty_and_five_thousand(website_url: str):
     question = f"""
     Check if this webshop sells products typically between €50 and €5000.
 
-    Organization: {org_name}
     Website: {website_url}
 
     Return ONLY valid JSON:
@@ -54,20 +53,15 @@ def _is_products_between_fifty_and_five_thousand(org_name: str, website_url: str
     return response.text
 
 # Wrapper that ensures safe concurrent calls
-def _safe_price_check(lead):
-    org_name = lead.get("organization_name", "")
-    website_url = lead.get("website_url", "")
-
-    if not website_url or not website_url.strip():
-        return None
+def _safe_price_check(domain_url):
 
     try:
-        result = _is_products_between_fifty_and_five_thousand(org_name, website_url)
+        result = _is_products_between_fifty_and_five_thousand(domain_url)
         result = result.strip()
         if '"answer": "yes"' in result or "yes" in result.lower():
-            return lead
+            return domain_url
     except Exception as e:
-        print(f"Error processing {org_name} ({website_url}): {e}")
+        print(f"Error processing ({domain_url}): {e}")
     return None
 
 

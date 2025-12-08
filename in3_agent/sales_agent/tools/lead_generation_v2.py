@@ -79,7 +79,7 @@ def is_json_file_empty(path):
 
     return data == {} or data == []  # JSON is structurally empty
 
-def _lead_generation(max_leads: int = 100):
+def lead_generation(max_leads: int = 100):
     """
     Use this tool to push lead data into the Pipedrive CRM system.
 
@@ -108,7 +108,7 @@ def _lead_generation(max_leads: int = 100):
     existing_leads = get_existing_leads()
     existing_person_map_in_bigquery = _get_unique_names()
 
-    if is_empty == False:
+    if not is_empty:
 
         for idx, lead in enumerate(lead_data):
             if max_leads and idx >= max_leads:

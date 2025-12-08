@@ -5,10 +5,15 @@
 # pycache folder
 **/__pycache__/
 
+# Callback folders
+**/callbacks/
+
 # Backup and env files
 backup_in3/
 in3_agent/.env
-in3_agent/sales_agent_copy
+in3_agent/sales_agent_v1
+in3_agent/sales_agent_v2
+in3_agent/sales_agent_v3
 in3_agent/sales_agent/tools_backup
 
 # test folder

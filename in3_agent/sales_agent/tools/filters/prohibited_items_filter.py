@@ -1,5 +1,6 @@
 # Import necessary packages
 import os
+import json
 from google import genai
 from typing import Literal
 from dotenv import load_dotenv
@@ -18,7 +19,7 @@ class OutputSchema(BaseModel):
     answer: Literal["yes", "no"]
 
 # Keep your original function EXACTLY as-is (you said it's working)
-def _is_not_selling_prohibited_items(org_name: str, website_url: str):
+def _is_not_selling_prohibited_items(website_url: str):
     question = f"""
     Determine whether this webshop sells ANY prohibited or restricted items 
     that violate in3 rules.
@@ -34,7 +35,6 @@ def _is_not_selling_prohibited_items(org_name: str, website_url: str):
     - Financial services, donations, political, government
     - Any item in in3's “Prohibited Items List”
 
-    Organization: {org_name}
     Website: {website_url}
 
     Return ONLY JSON:
@@ -57,21 +57,15 @@ def _is_not_selling_prohibited_items(org_name: str, website_url: str):
     )
     return response.text
 
-def _safe_check_for_prohibited_items(lead):
-    org_name = lead.get("organization_name", "")
-    website_url = lead.get("website_url", "")
-
-    if not website_url or not website_url.strip():
-        return None
-
+def _safe_check_for_prohibited_items(domain_url):
     try:
-        result = _is_not_selling_prohibited_items(org_name, website_url).strip()
+        result = _is_not_selling_prohibited_items(domain_url).strip()
         if '"answer": "no"' in result:
-            return lead
+            return domain_url
         else:
             None
     except Exception as e:
-        return lead  # keep on error — better to review manually than lose a lead
+        return domain_url  # keep on error — better to review manually than lose a lead
 
     return None
 
@@ -96,10 +90,8 @@ def _process_prohibted_items_filter(price_filtering_leads: list):
     
     print("Prohibited items checking completed sucessfully")
 
-    # # Save results
-    # with open(DESTINATION_FILE_PATH, "w") as f:
-    #     json.dump(prohibited_no_leads, f, indent=4)
+    # Save results
+    with open(DESTINATION_FILE_PATH, "w") as f:
+        json.dump(prohibited_no_leads, f, indent=4)
 
-    domain_list = [company['primary_domain'] for company in prohibited_no_leads]
-
-    return domain_list
+    return prohibited_no_leads

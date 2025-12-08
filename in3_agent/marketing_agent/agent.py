@@ -1,5 +1,5 @@
 # Import necassary packages
-from .icon_agent  import icon_agent
+from .icon_agent import icon_agent
 from google.adk.agents import LlmAgent
 from .prompt import MARKETING_AGENT_PROMPT
 from .linkedin_agent import linkedin_post_agent
@@ -17,10 +17,12 @@ root_agent = LlmAgent(
     """,
     instruction=MARKETING_AGENT_PROMPT,
     model="gemini-2.5-pro",
-    generate_content_config=GenerateContentConfig(
-        temperature=0.2,
-        top_k=2,
-        top_p=1.0
-    ),
-    sub_agents = [ad_campaign_agent, icon_agent, illustration_agent, linkedin_post_agent, video_generation_agent]
+    generate_content_config=GenerateContentConfig(temperature=0.2, top_k=2, top_p=1.0),
+    sub_agents=[
+        ad_campaign_agent,
+        icon_agent,
+        illustration_agent,
+        linkedin_post_agent,
+        video_generation_agent,
+    ],
 )

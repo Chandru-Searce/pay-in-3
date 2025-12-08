@@ -2,10 +2,11 @@
 import os
 from google.genai import types
 from google.adk.agents import LlmAgent
-from .tools.apply_filters import _lead_extraction
-from .tools.lead_generation_v2 import _lead_generation
-from .tools.email_template import _email_template_generator
-from .prompt import SYSTEM_INSTRUCTION_FOR_SALES_AGENT
+from .tools.lead_extraction import lead_extraction
+from .tools.extract_people_info import extract_people_info
+from .tools.lead_generation_v2 import lead_generation
+from .tools.email_template import email_template_generator
+from .prompts.sales_agent_prompt import SYSTEM_INSTRUCTION_FOR_SALES_AGENT
 
 # Example: Defining the basic identity
 root_agent = LlmAgent(
@@ -13,7 +14,7 @@ root_agent = LlmAgent(
     name="sales_agent",
     description="Answer the user's query according to their requirements",
     instruction=SYSTEM_INSTRUCTION_FOR_SALES_AGENT,
-    tools=[_lead_extraction, _lead_generation, _email_template_generator],
+    tools=[lead_extraction, extract_people_info, lead_generation, email_template_generator],
     generate_content_config = types.GenerateContentConfig(
         temperature=0.2,
     )

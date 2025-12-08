@@ -2,10 +2,8 @@
 from google.adk.agents import LlmAgent
 from google.genai.types import GenerateContentConfig
 from .prompt import ILLUSTRATION_GENERATION_AGENT_PROMPT
-from .tools.illustration_generator import _illustration_generator_function
 from .tools.illustration_editor import _edit_illustration_design
-from .callbacks.return_artifacts import _return_generated_illustrations
-
+from .tools.illustration_generator import _illustration_generator_function
 
 root_agent = LlmAgent(
     name="illustration_agent",
@@ -21,11 +19,6 @@ root_agent = LlmAgent(
     """,
     instruction=ILLUSTRATION_GENERATION_AGENT_PROMPT,
     model="gemini-2.5-pro",
-    generate_content_config=GenerateContentConfig(
-        temperature=0.2,
-        top_k=2,
-        top_p=1.0
-    ),
+    generate_content_config=GenerateContentConfig(temperature=0.2, top_k=2, top_p=1.0),
     tools=[_illustration_generator_function, _edit_illustration_design],
-    # after_tool_callback=_return_generated_illustrations
 )

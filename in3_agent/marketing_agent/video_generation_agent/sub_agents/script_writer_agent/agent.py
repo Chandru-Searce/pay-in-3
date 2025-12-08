@@ -18,10 +18,6 @@ root_agent = LlmAgent(
     Ensure all communication is concise, professional, and clear.
     """,
     model="gemini-2.5-pro",
-    generate_content_config=GenerateContentConfig(
-        temperature=0.2,
-        top_k=2,
-        top_p=1.0
-    ),
-    tools=[_script_generator_func]
+    generate_content_config=GenerateContentConfig(temperature=0.2, top_k=2, top_p=1.0),
+    tools=[_script_generator_func],
 )

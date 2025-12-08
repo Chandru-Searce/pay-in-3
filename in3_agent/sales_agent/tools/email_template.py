@@ -1,12 +1,12 @@
 # Import necassary packages
 from .utils.gemini_client import gemini_client
 from google.genai.types import GoogleSearch, Tool, GenerateContentConfig
-from ..prompt import SYSTEM_INSTRUCTION_FOR_EMAIL_TEMPLATE_GENERATION
+from ..prompts.email_template_prompt import SYSTEM_INSTRUCTION_FOR_EMAIL_TEMPLATE_GENERATION
 
 # Initialize client
 gemini_client = gemini_client
 
-def _email_template_generator(user_input: str):
+def email_template_generator(user_input: str):
     """
     Generates a professional outreach email template introducing the in3 payment solution.
 

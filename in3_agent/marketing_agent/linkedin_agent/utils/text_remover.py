@@ -1,21 +1,15 @@
 # Import necassary packages
-from google import genai
 from google.genai import types
 from .prompt import TEXT_REMOVER_PROMPT
 from ...utils.gemini_client import gemini_client
 
-# gemini_client = genai.Client(
-#         vertexai=True,
-#         project="prj-in3-prod-svc-01",
-#         location="europe-west4",
-#     )
 
 def _remove_text_from_generated_image(gcs_uri_with_text: str) -> bytes:
     """
     This function helps to remove from the generated image without modifiying other visual elements.
 
     Args:
-        generated_image: 
+        generated_image:
             Generated image which contains headline text and CTA button text.
 
     Returns:
@@ -23,19 +17,15 @@ def _remove_text_from_generated_image(gcs_uri_with_text: str) -> bytes:
             A generated image without text as types.Part objects.
     """
 
-    prompt_for_remove_text = types.Part(
-        text=TEXT_REMOVER_PROMPT
-    )
+    prompt_for_remove_text = types.Part(text=TEXT_REMOVER_PROMPT)
 
     generated_image_with_text = types.Part.from_uri(
-        file_uri= gcs_uri_with_text,
-        mime_type="image/png"
+        file_uri=gcs_uri_with_text, mime_type="image/png"
     )
 
     content = [
         types.Content(
-            role="user",
-            parts= [generated_image_with_text] + [prompt_for_remove_text]
+            role="user", parts=[generated_image_with_text] + [prompt_for_remove_text]
         )
     ]
 
@@ -46,8 +36,12 @@ def _remove_text_from_generated_image(gcs_uri_with_text: str) -> bytes:
         response_modalities=["IMAGE"],
         safety_settings=[
             types.SafetySetting(category="HARM_CATEGORY_HATE_SPEECH", threshold="OFF"),
-            types.SafetySetting(category="HARM_CATEGORY_DANGEROUS_CONTENT", threshold="OFF"),
-            types.SafetySetting(category="HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold="OFF"),
+            types.SafetySetting(
+                category="HARM_CATEGORY_DANGEROUS_CONTENT", threshold="OFF"
+            ),
+            types.SafetySetting(
+                category="HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold="OFF"
+            ),
             types.SafetySetting(category="HARM_CATEGORY_HARASSMENT", threshold="OFF"),
         ],
     )
@@ -70,8 +64,5 @@ def _remove_text_from_generated_image(gcs_uri_with_text: str) -> bytes:
 
     if not generated_image_without_text:
         return "No image was generated."
-
-    # with open("ad_campaign_image.png", "wb") as f:
-    #     f.write(generated_image_without_text)
 
     return generated_image_without_text

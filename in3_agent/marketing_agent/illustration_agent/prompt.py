@@ -112,5 +112,4 @@ ILLUSTRATION_GENERATION_AGENT_PROMPT = """
     ]
   }
 }
-
 """

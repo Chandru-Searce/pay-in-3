@@ -4,6 +4,7 @@ import json
 import requests
 from typing import List
 from dotenv import load_dotenv
+from .bulk_people_enrichment import _people_enrichment_bulk
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Load env variables
@@ -15,30 +16,32 @@ PEOPLE_SEARCH_API_URL = os.getenv("PEOPLE_SEARCH_API")
 
 # Destination file
 DESTINATION_FILE_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "..",
-    "lead_data",
-    "people-info.json"
+    os.path.dirname(os.path.abspath(__file__)), "..", "lead_data", "people-info.json"
 )
 
-
-# --------------------- FUNCTION TO FETCH 1 DOMAIN ---------------------
 
 def _fetch_people_by_domain(domain: str) -> List[dict]:
     """Fetch leads for a single domain. Domain must be wrapped inside a list."""
 
     payload = {
-        "person_titles": ["E-commerce Manager", "Marketing Manager", "Sales Manager", "CEO", "Owner", "Founder"],
+        "person_titles": [
+            "E-commerce Manager",
+            "Marketing Manager",
+            "Sales Manager",
+            "CEO",
+            "Owner",
+            "Founder",
+        ],
         "q_organization_domains_list": [domain],
         "include_similar_titles": True,
-        "per_page": 100
+        "per_page": 100,
     }
 
     headers = {
         "accept": "application/json",
         "Cache-Control": "no-cache",
         "Content-Type": "application/json",
-        "x-api-key": APOLLO_API_KEY
+        "x-api-key": APOLLO_API_KEY,
     }
 
     try:
@@ -66,7 +69,7 @@ def _fetch_people_by_domain(domain: str) -> List[dict]:
             "organization_phone_number": org.get("primary_phone", {}).get("number", ""),
             "person_linkedin_url": person.get("linkedin_url", ""),
             "person_facebook_url": person.get("facebook_url", ""),
-            "person_github_url": person.get("github_url", "")
+            "person_github_url": person.get("github_url", ""),
         }
 
         people.append(lead)
@@ -75,39 +78,38 @@ def _fetch_people_by_domain(domain: str) -> List[dict]:
     return people
 
 
-# --------------------- MAIN FUNCTION ---------------------
-
-def _extract_people_info(domain_list: List[str]):
+def extract_people_info():
     """Run each domain in parallel and save combined results."""
+
+    COMPANY_DOMAINS_FILE_PATH = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..",
+        "lead_data",
+        "final-leads-without-enrichment.json",
+    )
+
+    with open(COMPANY_DOMAINS_FILE_PATH, "r") as file:
+        domain_list = json.load(file)
 
     all_results = []
 
     # Run requests in parallel
     with ThreadPoolExecutor(max_workers=10) as executor:
-        futures = {executor.submit(_fetch_people_by_domain, domain): domain for domain in domain_list}
+        futures = {
+            executor.submit(_fetch_people_by_domain, domain): domain
+            for domain in domain_list
+        }
 
         for future in as_completed(futures):
             domain = futures[future]
             try:
                 result = future.result()
-                all_results.extend(result)   # append results from each domain
+                all_results.extend(result)  # append results from each domain
             except Exception as e:
                 print(f"❌ Error processing domain {domain}: {e}")
 
-    # Save all combined results
-    os.makedirs(os.path.dirname(DESTINATION_FILE_PATH), exist_ok=True)
+    print("\n Start to enrich the lead details")
 
-    with open(DESTINATION_FILE_PATH, "w") as file:
-        json.dump(all_results, file, indent=4)
+    enriched_leads = _people_enrichment_bulk(all_results)
 
-    print(f"\n💾 Saved {len(all_results)} leads → {DESTINATION_FILE_PATH}")
-
-    return all_results
-
-
-# with open("/home/chandru/Chandru/in3/in3_agent/sales_agent/lead_data/company-info.json", "r") as file:
-#     company_data = json.load(file)
-
-# domains = [company['primary_domain'] for company in company_data]
-
-# _extract_people_info(domain_list=domains[:20])
+    return enriched_leads

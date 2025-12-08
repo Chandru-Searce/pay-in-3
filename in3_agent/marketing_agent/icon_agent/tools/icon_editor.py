@@ -1,22 +1,10 @@
 # Import necassary packages
 import uuid
-from google import genai
 from google.genai import types
-from google.cloud.storage import Client
-from google.adk.tools import ToolContext
 from datetime import datetime, timezone
+from google.adk.tools import ToolContext
 from ...utils.gemini_client import gemini_client
 from ...utils.storage_client import storage_client
-
-# gemini_client = genai.Client(
-#         vertexai=True,
-#         project="prj-in3-prod-svc-01",
-#         location="europe-west4",
-#     )
-
-# storage_client = Client(
-#     project="prj-in3-prod-svc-01"
-# )
 
 def _edit_icon_design(user_prompt: str, tool_context: ToolContext):
     """
@@ -51,12 +39,16 @@ def _edit_icon_design(user_prompt: str, tool_context: ToolContext):
         response_modalities=["TEXT", "IMAGE"],
         safety_settings=[
             types.SafetySetting(category="HARM_CATEGORY_HATE_SPEECH", threshold="OFF"),
-            types.SafetySetting(category="HARM_CATEGORY_DANGEROUS_CONTENT", threshold="OFF"),
-            types.SafetySetting(category="HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold="OFF"),
+            types.SafetySetting(
+                category="HARM_CATEGORY_DANGEROUS_CONTENT", threshold="OFF"
+            ),
+            types.SafetySetting(
+                category="HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold="OFF"
+            ),
             types.SafetySetting(category="HARM_CATEGORY_HARASSMENT", threshold="OFF"),
         ],
     )
-    
+
     text_input = types.Part.from_text(text=user_prompt)
 
     contents = [
@@ -69,7 +61,7 @@ def _edit_icon_design(user_prompt: str, tool_context: ToolContext):
     response = gemini_client.models.generate_content(
         model="gemini-2.5-flash-image",
         config=generate_content_config,
-        contents=contents
+        contents=contents,
     )
 
     # --- Collect first generated image ---
@@ -84,20 +76,12 @@ def _edit_icon_design(user_prompt: str, tool_context: ToolContext):
 
     if not generated_image:
         return "No image was generated."
-    
-    # with open("ad_campaign_image.png", "wb") as f:
-    #     f.write(generated_image)
 
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     destination_blob = f"icons/{timestamp}_{uuid.uuid4().hex[:8]}_(edited).png"
     blob = bucket.blob(destination_blob)
-    blob.upload_from_string(
-        data=generated_image,
-        content_type="image/png"
-    )
+    blob.upload_from_string(data=generated_image, content_type="image/png")
 
-    # edited_image = types.Part(inline_data=types.Blob(data=generated_image, mime_type="image/png"))
-    
     return {
         "Status": "Icon edited successfully",
         "Edited_Icon_Public_URL": f"https://storage.cloud.google.com/{bucket_name}/{destination_blob}",
