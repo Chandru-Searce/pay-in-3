@@ -21,8 +21,8 @@ test/
 
 # Folders to exclude
 in3_agent/agent_engine_deployment/
-in3_agent/register_to_agentspace/
-in3_agent/update_to_agentspace/
+# in3_agent/register_to_agentspace/
+# in3_agent/update_to_agentspace/
 notebooks/
 
 # Dockerfile
@@ -46,5 +46,5 @@ in3_agent/sales_agent/tools_copy/filter_ecommerce.py
 in3_agent/sales_agent/tools_copy/filters/location_filter.py
 in3_agent/sales_agent/tools_copy/filters/payment_filter.py
 in3_agent/sales_agent/tools_copy/filters/service.py
-marketing_agent_deployment.py
-sales_agent_deployment.py
+# marketing_agent_deployment.py
+# sales_agent_deployment.py
